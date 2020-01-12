@@ -115,6 +115,20 @@ namespace GHLCP
                     showFSGSplash.Checked = true;
                 }
             }
+
+            if (platform == "Wii U")
+            {
+                XmlDocument rendergeneral = new XmlDocument();
+                rendergeneral.Load(gamedir + "\\Configs\\RenderGeneral.xml");
+                XmlElement videotarget = (XmlElement)rendergeneral.SelectNodes("/config/Texture[@Name='VideoTarget']")[0];
+                if (videotarget.GetAttribute("Width") == "0" && videotarget.GetAttribute("Height") == "0")
+                {
+                    disableBGVideo.Checked = true;
+                }
+            } else
+            {
+                disableBGVideo.Enabled = false;
+            }
         }
 
         private void MainWindow_Load(object sender, EventArgs e)
@@ -249,8 +263,15 @@ namespace GHLCP
             } else
             {
                 installedSetActive.Enabled = true;
-                installedRemove.Enabled = true;
-                installedEdit.Enabled = true;
+                if (installedListView.SelectedIndices.Count == 1)
+                {
+                    installedRemove.Enabled = true;
+                    installedEdit.Enabled = true;
+                } else
+                {
+                    installedRemove.Enabled = false;
+                    installedEdit.Enabled = false;
+                }
                 if (defaultTracks.Contains(installedListView.SelectedItems[0].SubItems[0].Text))
                 {
                     installedRemove.Enabled = false;
@@ -261,9 +282,18 @@ namespace GHLCP
                 installedSetActive.Text = "Add To Quickplay";
                 foreach (ListViewItem item in activeListView.Items)
                 {
-                    if (item.SubItems[0].Text == installedListView.SelectedItems[0].SubItems[0].Text)
+                    foreach (ListViewItem selecteditem in installedListView.SelectedItems)
                     {
-                        installedSetActive.Text = "Remove From Quickplay";
+                        if (item.SubItems[0].Text == selecteditem.SubItems[0].Text)
+                        {
+                            if (installedListView.SelectedIndices.Count > 1)
+                            {
+                                installedSetActive.Enabled = false;
+                            } else
+                            {
+                                installedSetActive.Text = "Remove From Quickplay";
+                            }
+                        }
                     }
                 }
             }
@@ -310,9 +340,18 @@ namespace GHLCP
                 }
             } else
             {
-                activeListView.Items.Add((ListViewItem)installedListView.SelectedItems[0].Clone());
-                activeListView.Sort();
-                installedSetActive.Text = "Remove From Quickplay";
+                foreach(ListViewItem item in installedListView.SelectedItems)
+                {
+                    activeListView.Items.Add((ListViewItem)item.Clone());
+                    activeListView.Sort();
+                    if (installedListView.SelectedIndices.Count == 1)
+                    {
+                        installedSetActive.Text = "Remove From Quickplay";
+                    } else
+                    {
+                        installedSetActive.Enabled = false;
+                    }
+                }
             }
         }
 
@@ -622,6 +661,23 @@ namespace GHLCP
             File.Copy(gamedir + "\\UI\\GameUI.xml", gamedir + "\\UI\\GameUI.xml.bak", true);
             File.WriteAllText(gamedir + "\\UI\\GameUI.xml", gameui.OuterXml);
 
+            if (platform == "Wii U")
+            {
+                XmlDocument rendergeneral = new XmlDocument();
+                rendergeneral.Load(gamedir + "\\Configs\\RenderGeneral.xml");
+                XmlElement videotarget = (XmlElement)rendergeneral.SelectNodes("/config/Texture[@Name='VideoTarget']")[0];
+                if (disableBGVideo.Checked)
+                {
+                    videotarget.SetAttribute("Width", "0");
+                    videotarget.SetAttribute("Height", "0");
+                } else
+                {
+                    videotarget.SetAttribute("Width", "960");
+                    videotarget.SetAttribute("Height", "540");
+                }
+                File.Copy(gamedir + "\\Configs\\RenderGeneral.xml", gamedir + "\\Configs\\RenderGeneral.xml.bak", true);
+                File.WriteAllText(gamedir + "\\Configs\\RenderGeneral.xml", rendergeneral.OuterXml);
+            }
 
             MessageBox.Show("Saved modified game files!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -647,6 +703,71 @@ namespace GHLCP
             songDialog.ShowDialog();
             PopulateInstalled();
             PopulateActive();
+        }
+
+        private void applyHyperspeed_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in installedListView.Items)
+            {
+                XmlDocument document = new XmlDocument();
+                document.Load(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml");
+                XmlNode highway = document.SelectSingleNode("Track/Highway");
+                ((XmlElement)highway).SetAttribute("newbeginner", speedBBox.Value.ToString());
+                ((XmlElement)highway).SetAttribute("neweasy", speedEBox.Value.ToString());
+                ((XmlElement)highway).SetAttribute("newmedium", speedMBox.Value.ToString());
+                ((XmlElement)highway).SetAttribute("newhard", speedHBox.Value.ToString());
+                ((XmlElement)highway).SetAttribute("newexpert", speedXBox.Value.ToString());
+                File.Copy(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml", gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml.bak", true);
+                File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml", document.OuterXml);
+            }
+            MessageBox.Show("Applied batch highway speeds!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void exportCSVButton_Click(object sender, EventArgs e)
+        {
+            string output = "Id,Artist,Title,Intensity";
+            foreach (ListViewItem item in activeListView.Items)
+            {
+                output += "\n";
+                output += item.SubItems[0].Text + "," + item.SubItems[2].Text + "," + item.SubItems[1].Text + "," + item.SubItems[3].Text;
+            }
+            if (saveCSVDialog.ShowDialog() == DialogResult.OK)
+            {
+                File.WriteAllText(saveCSVDialog.FileName, output);
+            }
+        }
+
+        private void disableVideosItem_Click(object sender, EventArgs e)
+        {
+            DialogResult dialog = MessageBox.Show("This will disable all background videos on stock songs in order to resolve issues on truncated copies of the game. Are you sure you want to continue?", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (dialog == DialogResult.Yes)
+            {
+                foreach (string track in defaultTracks)
+                {
+                    if (File.Exists(gamedir + "\\Audio\\AudioTracks\\" + track + "\\trackconfig.xml"))
+                    {
+                        XmlDocument document = new XmlDocument();
+                        document.Load(gamedir + "\\Audio\\AudioTracks\\" + track + "\\trackconfig.xml");
+                        XmlNode video = document.SelectSingleNode("Track/Video");
+                        ((XmlElement)video).SetAttribute("hasVideo", "false");
+                        File.Copy(gamedir + "\\Audio\\AudioTracks\\" + track + "\\trackconfig.xml", gamedir + "\\Audio\\AudioTracks\\" + track + "\\trackconfig.xml.bak", true);
+                        File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + track + "\\trackconfig.xml", document.OuterXml);
+                    }
+                }
+            }
+        }
+
+        private void disableAllVideosItem_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in installedListView.Items)
+            {
+                XmlDocument document = new XmlDocument();
+                document.Load(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml");
+                XmlNode video = document.SelectSingleNode("Track/Video");
+                ((XmlElement)video).SetAttribute("hasVideo", "false");
+                File.Copy(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml", gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml.bak", true);
+                File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml", document.OuterXml);
+            }
         }
     }
 }

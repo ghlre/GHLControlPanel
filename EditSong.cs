@@ -252,6 +252,8 @@ namespace GHLCP
             
             File.Copy(gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml", gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml.bak", true);
             File.WriteAllText(gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml", document.OuterXml);
+
+            Close();
         }
     }
 }

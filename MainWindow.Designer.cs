@@ -49,24 +49,41 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.activeControls = new System.Windows.Forms.Panel();
+            this.exportCSVButton = new System.Windows.Forms.Button();
             this.activeRemove = new System.Windows.Forms.Button();
             this.activeRefresh = new System.Windows.Forms.Button();
             this.activeEdit = new System.Windows.Forms.Button();
             this.gameHacks = new System.Windows.Forms.TabPage();
+            this.batchHyperspeed = new System.Windows.Forms.GroupBox();
+            this.speedXBox = new System.Windows.Forms.NumericUpDown();
+            this.spxlabel = new System.Windows.Forms.Label();
+            this.speedHBox = new System.Windows.Forms.NumericUpDown();
+            this.sphlabel = new System.Windows.Forms.Label();
+            this.speedMBox = new System.Windows.Forms.NumericUpDown();
+            this.spmlabel = new System.Windows.Forms.Label();
+            this.speedEBox = new System.Windows.Forms.NumericUpDown();
+            this.spelabel = new System.Windows.Forms.Label();
+            this.speedBBox = new System.Windows.Forms.NumericUpDown();
+            this.spblabel = new System.Windows.Forms.Label();
+            this.applyHyperspeed = new System.Windows.Forms.Button();
+            this.irreversibleWarning = new System.Windows.Forms.Label();
+            this.renderSettingsConfig = new System.Windows.Forms.GroupBox();
+            this.disableBGVideo = new System.Windows.Forms.CheckBox();
             this.gameStartupConfig = new System.Windows.Forms.GroupBox();
             this.showFSGSplash = new System.Windows.Forms.CheckBox();
             this.showActiSplash = new System.Windows.Forms.CheckBox();
             this.GHTVMaxUpgrades = new System.Windows.Forms.Button();
+            this.hmm = new System.Windows.Forms.PictureBox();
             this.defaultMods = new System.Windows.Forms.Button();
             this.reloadGameMods = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
+            this.moreSoon = new System.Windows.Forms.Label();
             this.scoringGroup = new System.Windows.Forms.GroupBox();
             this.pointsPerNote = new System.Windows.Forms.NumericUpDown();
-            this.label3 = new System.Windows.Forms.Label();
+            this.pointsPerNoteLabel = new System.Windows.Forms.Label();
             this.multiplierGroup = new System.Windows.Forms.GroupBox();
             this.notesPerMultiplier = new System.Windows.Forms.NumericUpDown();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.notesPerLevelLabel = new System.Windows.Forms.Label();
+            this.maximumMultiplierLabel = new System.Windows.Forms.Label();
             this.maximumMultiplier = new System.Windows.Forms.NumericUpDown();
             this.controlStrip = new System.Windows.Forms.MenuStrip();
             this.saveStrip = new System.Windows.Forms.ToolStripMenuItem();
@@ -81,21 +98,31 @@
             this.aboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fuckYouActivision = new System.Windows.Forms.ToolStripMenuItem();
             this.ImportSongDialog = new System.Windows.Forms.OpenFileDialog();
-            this.hmm = new System.Windows.Forms.PictureBox();
+            this.saveCSVDialog = new System.Windows.Forms.SaveFileDialog();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.disableVideosItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.disableAllVideosItem = new System.Windows.Forms.ToolStripMenuItem();
             this.songTabs.SuspendLayout();
             this.installedTracks.SuspendLayout();
             this.installedControls.SuspendLayout();
             this.activeTracks.SuspendLayout();
             this.activeControls.SuspendLayout();
             this.gameHacks.SuspendLayout();
+            this.batchHyperspeed.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.speedXBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedHBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedMBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedEBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedBBox)).BeginInit();
+            this.renderSettingsConfig.SuspendLayout();
             this.gameStartupConfig.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.hmm)).BeginInit();
             this.scoringGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pointsPerNote)).BeginInit();
             this.multiplierGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.notesPerMultiplier)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maximumMultiplier)).BeginInit();
             this.controlStrip.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.hmm)).BeginInit();
             this.SuspendLayout();
             // 
             // GameFinderDialog
@@ -114,8 +141,8 @@
             this.installedArtistHeader,
             this.installedIntensityHeader});
             this.installedListView.FullRowSelect = true;
+            this.installedListView.HideSelection = false;
             this.installedListView.Location = new System.Drawing.Point(6, 6);
-            this.installedListView.MultiSelect = false;
             this.installedListView.Name = "installedListView";
             this.installedListView.Size = new System.Drawing.Size(524, 453);
             this.installedListView.TabIndex = 0;
@@ -247,6 +274,7 @@
             this.columnHeader3,
             this.columnHeader4});
             this.activeListView.FullRowSelect = true;
+            this.activeListView.HideSelection = false;
             this.activeListView.Location = new System.Drawing.Point(6, 6);
             this.activeListView.MultiSelect = false;
             this.activeListView.Name = "activeListView";
@@ -277,6 +305,7 @@
             // 
             // activeControls
             // 
+            this.activeControls.Controls.Add(this.exportCSVButton);
             this.activeControls.Controls.Add(this.activeRemove);
             this.activeControls.Controls.Add(this.activeRefresh);
             this.activeControls.Controls.Add(this.activeEdit);
@@ -285,6 +314,16 @@
             this.activeControls.Name = "activeControls";
             this.activeControls.Size = new System.Drawing.Size(535, 29);
             this.activeControls.TabIndex = 3;
+            // 
+            // exportCSVButton
+            // 
+            this.exportCSVButton.Location = new System.Drawing.Point(62, 3);
+            this.exportCSVButton.Name = "exportCSVButton";
+            this.exportCSVButton.Size = new System.Drawing.Size(75, 23);
+            this.exportCSVButton.TabIndex = 4;
+            this.exportCSVButton.Text = "Export CSV";
+            this.exportCSVButton.UseVisualStyleBackColor = true;
+            this.exportCSVButton.Click += new System.EventHandler(this.exportCSVButton_Click);
             // 
             // activeRemove
             // 
@@ -322,12 +361,15 @@
             // 
             // gameHacks
             // 
+            this.gameHacks.AutoScroll = true;
+            this.gameHacks.Controls.Add(this.batchHyperspeed);
+            this.gameHacks.Controls.Add(this.renderSettingsConfig);
             this.gameHacks.Controls.Add(this.gameStartupConfig);
             this.gameHacks.Controls.Add(this.GHTVMaxUpgrades);
             this.gameHacks.Controls.Add(this.hmm);
             this.gameHacks.Controls.Add(this.defaultMods);
             this.gameHacks.Controls.Add(this.reloadGameMods);
-            this.gameHacks.Controls.Add(this.label4);
+            this.gameHacks.Controls.Add(this.moreSoon);
             this.gameHacks.Controls.Add(this.scoringGroup);
             this.gameHacks.Controls.Add(this.multiplierGroup);
             this.gameHacks.Location = new System.Drawing.Point(4, 22);
@@ -337,6 +379,177 @@
             this.gameHacks.TabIndex = 2;
             this.gameHacks.Text = "Game Modifications";
             this.gameHacks.UseVisualStyleBackColor = true;
+            // 
+            // batchHyperspeed
+            // 
+            this.batchHyperspeed.Controls.Add(this.speedXBox);
+            this.batchHyperspeed.Controls.Add(this.spxlabel);
+            this.batchHyperspeed.Controls.Add(this.speedHBox);
+            this.batchHyperspeed.Controls.Add(this.sphlabel);
+            this.batchHyperspeed.Controls.Add(this.speedMBox);
+            this.batchHyperspeed.Controls.Add(this.spmlabel);
+            this.batchHyperspeed.Controls.Add(this.speedEBox);
+            this.batchHyperspeed.Controls.Add(this.spelabel);
+            this.batchHyperspeed.Controls.Add(this.speedBBox);
+            this.batchHyperspeed.Controls.Add(this.spblabel);
+            this.batchHyperspeed.Controls.Add(this.applyHyperspeed);
+            this.batchHyperspeed.Controls.Add(this.irreversibleWarning);
+            this.batchHyperspeed.Location = new System.Drawing.Point(18, 215);
+            this.batchHyperspeed.Name = "batchHyperspeed";
+            this.batchHyperspeed.Size = new System.Drawing.Size(190, 195);
+            this.batchHyperspeed.TabIndex = 9;
+            this.batchHyperspeed.TabStop = false;
+            this.batchHyperspeed.Text = "Batch Hyperspeed";
+            // 
+            // speedXBox
+            // 
+            this.speedXBox.DecimalPlaces = 2;
+            this.speedXBox.Location = new System.Drawing.Point(89, 123);
+            this.speedXBox.Name = "speedXBox";
+            this.speedXBox.Size = new System.Drawing.Size(79, 20);
+            this.speedXBox.TabIndex = 21;
+            this.speedXBox.Value = new decimal(new int[] {
+            125,
+            0,
+            0,
+            131072});
+            // 
+            // spxlabel
+            // 
+            this.spxlabel.AutoSize = true;
+            this.spxlabel.Location = new System.Drawing.Point(8, 125);
+            this.spxlabel.Name = "spxlabel";
+            this.spxlabel.Size = new System.Drawing.Size(57, 13);
+            this.spxlabel.TabIndex = 20;
+            this.spxlabel.Text = "Speed [X]:";
+            // 
+            // speedHBox
+            // 
+            this.speedHBox.DecimalPlaces = 2;
+            this.speedHBox.Location = new System.Drawing.Point(89, 97);
+            this.speedHBox.Name = "speedHBox";
+            this.speedHBox.Size = new System.Drawing.Size(79, 20);
+            this.speedHBox.TabIndex = 19;
+            this.speedHBox.Value = new decimal(new int[] {
+            9,
+            0,
+            0,
+            65536});
+            // 
+            // sphlabel
+            // 
+            this.sphlabel.AutoSize = true;
+            this.sphlabel.Location = new System.Drawing.Point(8, 99);
+            this.sphlabel.Name = "sphlabel";
+            this.sphlabel.Size = new System.Drawing.Size(57, 13);
+            this.sphlabel.TabIndex = 18;
+            this.sphlabel.Text = "Speed [A]:";
+            // 
+            // speedMBox
+            // 
+            this.speedMBox.DecimalPlaces = 2;
+            this.speedMBox.Location = new System.Drawing.Point(89, 71);
+            this.speedMBox.Name = "speedMBox";
+            this.speedMBox.Size = new System.Drawing.Size(79, 20);
+            this.speedMBox.TabIndex = 17;
+            this.speedMBox.Value = new decimal(new int[] {
+            77,
+            0,
+            0,
+            131072});
+            // 
+            // spmlabel
+            // 
+            this.spmlabel.AutoSize = true;
+            this.spmlabel.Location = new System.Drawing.Point(8, 73);
+            this.spmlabel.Name = "spmlabel";
+            this.spmlabel.Size = new System.Drawing.Size(58, 13);
+            this.spmlabel.TabIndex = 16;
+            this.spmlabel.Text = "Speed [N]:";
+            // 
+            // speedEBox
+            // 
+            this.speedEBox.DecimalPlaces = 2;
+            this.speedEBox.Location = new System.Drawing.Point(89, 45);
+            this.speedEBox.Name = "speedEBox";
+            this.speedEBox.Size = new System.Drawing.Size(79, 20);
+            this.speedEBox.TabIndex = 15;
+            this.speedEBox.Value = new decimal(new int[] {
+            6,
+            0,
+            0,
+            65536});
+            // 
+            // spelabel
+            // 
+            this.spelabel.AutoSize = true;
+            this.spelabel.Location = new System.Drawing.Point(8, 47);
+            this.spelabel.Name = "spelabel";
+            this.spelabel.Size = new System.Drawing.Size(57, 13);
+            this.spelabel.TabIndex = 14;
+            this.spelabel.Text = "Speed [C]:";
+            // 
+            // speedBBox
+            // 
+            this.speedBBox.DecimalPlaces = 2;
+            this.speedBBox.Location = new System.Drawing.Point(89, 19);
+            this.speedBBox.Name = "speedBBox";
+            this.speedBBox.Size = new System.Drawing.Size(79, 20);
+            this.speedBBox.TabIndex = 13;
+            this.speedBBox.Value = new decimal(new int[] {
+            4,
+            0,
+            0,
+            65536});
+            // 
+            // spblabel
+            // 
+            this.spblabel.AutoSize = true;
+            this.spblabel.Location = new System.Drawing.Point(8, 21);
+            this.spblabel.Name = "spblabel";
+            this.spblabel.Size = new System.Drawing.Size(57, 13);
+            this.spblabel.TabIndex = 12;
+            this.spblabel.Text = "Speed [B]:";
+            // 
+            // applyHyperspeed
+            // 
+            this.applyHyperspeed.Location = new System.Drawing.Point(130, 166);
+            this.applyHyperspeed.Name = "applyHyperspeed";
+            this.applyHyperspeed.Size = new System.Drawing.Size(54, 23);
+            this.applyHyperspeed.TabIndex = 11;
+            this.applyHyperspeed.Text = "Apply";
+            this.applyHyperspeed.UseVisualStyleBackColor = true;
+            this.applyHyperspeed.Click += new System.EventHandler(this.applyHyperspeed_Click);
+            // 
+            // irreversibleWarning
+            // 
+            this.irreversibleWarning.AutoSize = true;
+            this.irreversibleWarning.ForeColor = System.Drawing.Color.Red;
+            this.irreversibleWarning.Location = new System.Drawing.Point(12, 148);
+            this.irreversibleWarning.Name = "irreversibleWarning";
+            this.irreversibleWarning.Size = new System.Drawing.Size(160, 13);
+            this.irreversibleWarning.TabIndex = 0;
+            this.irreversibleWarning.Text = "This change is IRREVERSIBLE!";
+            // 
+            // renderSettingsConfig
+            // 
+            this.renderSettingsConfig.Controls.Add(this.disableBGVideo);
+            this.renderSettingsConfig.Location = new System.Drawing.Point(232, 96);
+            this.renderSettingsConfig.Name = "renderSettingsConfig";
+            this.renderSettingsConfig.Size = new System.Drawing.Size(291, 49);
+            this.renderSettingsConfig.TabIndex = 8;
+            this.renderSettingsConfig.TabStop = false;
+            this.renderSettingsConfig.Text = "Render Settings";
+            // 
+            // disableBGVideo
+            // 
+            this.disableBGVideo.AutoSize = true;
+            this.disableBGVideo.Location = new System.Drawing.Point(11, 20);
+            this.disableBGVideo.Name = "disableBGVideo";
+            this.disableBGVideo.Size = new System.Drawing.Size(152, 17);
+            this.disableBGVideo.TabIndex = 0;
+            this.disableBGVideo.Text = "Disable Background Video";
+            this.disableBGVideo.UseVisualStyleBackColor = true;
             // 
             // gameStartupConfig
             // 
@@ -380,6 +593,16 @@
             this.GHTVMaxUpgrades.UseVisualStyleBackColor = true;
             this.GHTVMaxUpgrades.Click += new System.EventHandler(this.GHTVMaxUpgrades_Click);
             // 
+            // hmm
+            // 
+            this.hmm.Image = global::GHLCP.Properties.Resources._do;
+            this.hmm.Location = new System.Drawing.Point(343, 298);
+            this.hmm.Name = "hmm";
+            this.hmm.Size = new System.Drawing.Size(190, 190);
+            this.hmm.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.hmm.TabIndex = 5;
+            this.hmm.TabStop = false;
+            // 
             // defaultMods
             // 
             this.defaultMods.Location = new System.Drawing.Point(343, 269);
@@ -400,20 +623,20 @@
             this.reloadGameMods.UseVisualStyleBackColor = true;
             this.reloadGameMods.Click += new System.EventHandler(this.reloadGameMods_Click);
             // 
-            // label4
+            // moreSoon
             // 
-            this.label4.AutoSize = true;
-            this.label4.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label4.Location = new System.Drawing.Point(75, 378);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(195, 13);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "More options will be added in the future!";
+            this.moreSoon.AutoSize = true;
+            this.moreSoon.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.moreSoon.Location = new System.Drawing.Point(278, 196);
+            this.moreSoon.Name = "moreSoon";
+            this.moreSoon.Size = new System.Drawing.Size(195, 13);
+            this.moreSoon.TabIndex = 2;
+            this.moreSoon.Text = "More options will be added in the future!";
             // 
             // scoringGroup
             // 
             this.scoringGroup.Controls.Add(this.pointsPerNote);
-            this.scoringGroup.Controls.Add(this.label3);
+            this.scoringGroup.Controls.Add(this.pointsPerNoteLabel);
             this.scoringGroup.Location = new System.Drawing.Point(18, 116);
             this.scoringGroup.Name = "scoringGroup";
             this.scoringGroup.Size = new System.Drawing.Size(190, 64);
@@ -433,20 +656,20 @@
             0,
             0});
             // 
-            // label3
+            // pointsPerNoteLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(17, 30);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(84, 13);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "Points Per Note:";
+            this.pointsPerNoteLabel.AutoSize = true;
+            this.pointsPerNoteLabel.Location = new System.Drawing.Point(17, 30);
+            this.pointsPerNoteLabel.Name = "pointsPerNoteLabel";
+            this.pointsPerNoteLabel.Size = new System.Drawing.Size(84, 13);
+            this.pointsPerNoteLabel.TabIndex = 0;
+            this.pointsPerNoteLabel.Text = "Points Per Note:";
             // 
             // multiplierGroup
             // 
             this.multiplierGroup.Controls.Add(this.notesPerMultiplier);
-            this.multiplierGroup.Controls.Add(this.label2);
-            this.multiplierGroup.Controls.Add(this.label1);
+            this.multiplierGroup.Controls.Add(this.notesPerLevelLabel);
+            this.multiplierGroup.Controls.Add(this.maximumMultiplierLabel);
             this.multiplierGroup.Controls.Add(this.maximumMultiplier);
             this.multiplierGroup.Location = new System.Drawing.Point(18, 18);
             this.multiplierGroup.Name = "multiplierGroup";
@@ -472,23 +695,23 @@
             0,
             0});
             // 
-            // label2
+            // notesPerLevelLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(17, 59);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(86, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Notes Per Level:";
+            this.notesPerLevelLabel.AutoSize = true;
+            this.notesPerLevelLabel.Location = new System.Drawing.Point(17, 59);
+            this.notesPerLevelLabel.Name = "notesPerLevelLabel";
+            this.notesPerLevelLabel.Size = new System.Drawing.Size(86, 13);
+            this.notesPerLevelLabel.TabIndex = 2;
+            this.notesPerLevelLabel.Text = "Notes Per Level:";
             // 
-            // label1
+            // maximumMultiplierLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(17, 26);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(98, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Maximum Multiplier:";
+            this.maximumMultiplierLabel.AutoSize = true;
+            this.maximumMultiplierLabel.Location = new System.Drawing.Point(17, 26);
+            this.maximumMultiplierLabel.Name = "maximumMultiplierLabel";
+            this.maximumMultiplierLabel.Size = new System.Drawing.Size(98, 13);
+            this.maximumMultiplierLabel.TabIndex = 1;
+            this.maximumMultiplierLabel.Text = "Maximum Multiplier:";
             // 
             // maximumMultiplier
             // 
@@ -551,7 +774,10 @@
             // 
             this.tracksStrip.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.downloadTracksItem,
-            this.importTracksItem});
+            this.importTracksItem,
+            this.toolStripSeparator1,
+            this.disableVideosItem,
+            this.disableAllVideosItem});
             this.tracksStrip.Name = "tracksStrip";
             this.tracksStrip.Size = new System.Drawing.Size(51, 20);
             this.tracksStrip.Text = "Tracks";
@@ -560,13 +786,13 @@
             // 
             this.downloadTracksItem.Enabled = false;
             this.downloadTracksItem.Name = "downloadTracksItem";
-            this.downloadTracksItem.Size = new System.Drawing.Size(163, 22);
+            this.downloadTracksItem.Size = new System.Drawing.Size(182, 22);
             this.downloadTracksItem.Text = "Download Tracks";
             // 
             // importTracksItem
             // 
             this.importTracksItem.Name = "importTracksItem";
-            this.importTracksItem.Size = new System.Drawing.Size(163, 22);
+            this.importTracksItem.Size = new System.Drawing.Size(182, 22);
             this.importTracksItem.Text = "Import Tracks";
             this.importTracksItem.Click += new System.EventHandler(this.importTracksItem_Click);
             // 
@@ -612,15 +838,30 @@
             this.ImportSongDialog.Filter = "GHLCP Song Files|*.ghlcp;*.zip";
             this.ImportSongDialog.Multiselect = true;
             // 
-            // hmm
+            // saveCSVDialog
             // 
-            this.hmm.Image = global::GHLCP.Properties.Resources._do;
-            this.hmm.Location = new System.Drawing.Point(343, 298);
-            this.hmm.Name = "hmm";
-            this.hmm.Size = new System.Drawing.Size(190, 190);
-            this.hmm.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.hmm.TabIndex = 5;
-            this.hmm.TabStop = false;
+            this.saveCSVDialog.FileName = "songs";
+            this.saveCSVDialog.Filter = "CSV file|*.csv|All files|*.*";
+            this.saveCSVDialog.Title = "Export Songlist CSV";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(179, 6);
+            // 
+            // disableVideosItem
+            // 
+            this.disableVideosItem.Name = "disableVideosItem";
+            this.disableVideosItem.Size = new System.Drawing.Size(182, 22);
+            this.disableVideosItem.Text = "Disable Stock Videos";
+            this.disableVideosItem.Click += new System.EventHandler(this.disableVideosItem_Click);
+            // 
+            // disableAllVideosItem
+            // 
+            this.disableAllVideosItem.Name = "disableAllVideosItem";
+            this.disableAllVideosItem.Size = new System.Drawing.Size(182, 22);
+            this.disableAllVideosItem.Text = "Disable All Videos";
+            this.disableAllVideosItem.Click += new System.EventHandler(this.disableAllVideosItem_Click);
             // 
             // MainWindow
             // 
@@ -641,8 +882,18 @@
             this.activeControls.ResumeLayout(false);
             this.gameHacks.ResumeLayout(false);
             this.gameHacks.PerformLayout();
+            this.batchHyperspeed.ResumeLayout(false);
+            this.batchHyperspeed.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.speedXBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedHBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedMBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedEBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedBBox)).EndInit();
+            this.renderSettingsConfig.ResumeLayout(false);
+            this.renderSettingsConfig.PerformLayout();
             this.gameStartupConfig.ResumeLayout(false);
             this.gameStartupConfig.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.hmm)).EndInit();
             this.scoringGroup.ResumeLayout(false);
             this.scoringGroup.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pointsPerNote)).EndInit();
@@ -652,7 +903,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.maximumMultiplier)).EndInit();
             this.controlStrip.ResumeLayout(false);
             this.controlStrip.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.hmm)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -696,16 +946,16 @@
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.GroupBox scoringGroup;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label pointsPerNoteLabel;
         private System.Windows.Forms.GroupBox multiplierGroup;
         private System.Windows.Forms.NumericUpDown notesPerMultiplier;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label notesPerLevelLabel;
+        private System.Windows.Forms.Label maximumMultiplierLabel;
         private System.Windows.Forms.NumericUpDown maximumMultiplier;
         private System.Windows.Forms.PictureBox hmm;
         private System.Windows.Forms.Button defaultMods;
         private System.Windows.Forms.Button reloadGameMods;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label moreSoon;
         private System.Windows.Forms.NumericUpDown pointsPerNote;
         private System.Windows.Forms.Button GHTVMaxUpgrades;
         private System.Windows.Forms.OpenFileDialog ImportSongDialog;
@@ -713,6 +963,26 @@
         private System.Windows.Forms.GroupBox gameStartupConfig;
         private System.Windows.Forms.CheckBox showFSGSplash;
         private System.Windows.Forms.CheckBox showActiSplash;
+        private System.Windows.Forms.GroupBox batchHyperspeed;
+        private System.Windows.Forms.Label irreversibleWarning;
+        private System.Windows.Forms.GroupBox renderSettingsConfig;
+        private System.Windows.Forms.CheckBox disableBGVideo;
+        private System.Windows.Forms.Button applyHyperspeed;
+        private System.Windows.Forms.NumericUpDown speedXBox;
+        private System.Windows.Forms.Label spxlabel;
+        private System.Windows.Forms.NumericUpDown speedHBox;
+        private System.Windows.Forms.Label sphlabel;
+        private System.Windows.Forms.NumericUpDown speedMBox;
+        private System.Windows.Forms.Label spmlabel;
+        private System.Windows.Forms.NumericUpDown speedEBox;
+        private System.Windows.Forms.Label spelabel;
+        private System.Windows.Forms.NumericUpDown speedBBox;
+        private System.Windows.Forms.Label spblabel;
+        private System.Windows.Forms.Button exportCSVButton;
+        private System.Windows.Forms.SaveFileDialog saveCSVDialog;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem disableVideosItem;
+        private System.Windows.Forms.ToolStripMenuItem disableAllVideosItem;
     }
 }
 
