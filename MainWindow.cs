@@ -439,6 +439,8 @@ namespace GHLCP
                     MessageBox.Show("There was an unknown error that occurred while importing one or more of your songs.");
                 }
             }
+            PopulateInstalled();
+            PopulateActive();
         }
 
         private void HandleImport(string filename)
@@ -490,8 +492,6 @@ namespace GHLCP
                 }
                 File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + songID + "\\manifest.txt", manifestfile);
             }
-            PopulateActive();
-            PopulateInstalled();
         }
 
         private void installedRemove_Click(object sender, EventArgs e)
