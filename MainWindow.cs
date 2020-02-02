@@ -12,9 +12,11 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Web;
+using System.Collections;
 
 namespace GHLCP
 {
+
     public partial class MainWindow : Form
     {
         string platform = "";
@@ -38,10 +40,11 @@ namespace GHLCP
             {
                 if (!File.Exists(path + "\\trackconfig.xml"))
                 {
-                    return;
+                    continue;
                 }
                 XmlDocument doc = new XmlDocument();
-                doc.Load(path + "\\trackconfig.xml");
+                StreamReader file = new StreamReader(path + "\\trackconfig.xml", true);
+                doc.Load(file.BaseStream);
                 XmlElement track = doc.DocumentElement;
                 if (track.HasAttribute("intensity"))
                 {
@@ -52,7 +55,9 @@ namespace GHLCP
                     installedListView.Items.Add(new ListViewItem(new string[] { track.GetAttributeNode("id").InnerText, track.GetAttributeNode("trackname").InnerText, track.GetAttributeNode("artist").InnerText, "0" }));
                 }
             }
-            installedListView.Sort();
+            installedListView.Sorting = SortOrder.Ascending;
+            installedListView.ListViewItemSorter = null;
+            installedListView.ColumnClick += ListView_ColumnClick;
         }
 
         private void PopulateActive()
@@ -83,7 +88,32 @@ namespace GHLCP
                     }
                 }
             }
-            activeListView.Sort();
+            activeListView.Sorting = SortOrder.Ascending;
+            activeListView.ListViewItemSorter = null;
+            activeListView.ColumnClick += ListView_ColumnClick;
+        }
+
+        private void ListView_ColumnClick(object o, ColumnClickEventArgs e)
+        {
+            if (((ListViewItemComparer)((ListView)o).ListViewItemSorter) != null && ((ListViewItemComparer)((ListView)o).ListViewItemSorter).col == e.Column)
+            {
+                switch(((ListView)o).Sorting)
+                {
+                    case SortOrder.Ascending:
+                        ((ListViewItemComparer)((ListView)o).ListViewItemSorter).descending = true;
+                        ((ListView)o).Sorting = SortOrder.Descending;
+                        break;
+                    default:
+                        ((ListViewItemComparer)((ListView)o).ListViewItemSorter).descending = false;
+                        ((ListView)o).Sorting = SortOrder.Ascending;
+                        break;
+                }
+                ((ListView)o).Sort();
+            } else
+            {
+                ((ListView)o).Sorting = SortOrder.Ascending;
+                ((ListView)o).ListViewItemSorter = new ListViewItemComparer(e.Column);
+            }
         }
 
         private void ReadGameModifications()
@@ -96,10 +126,12 @@ namespace GHLCP
             configStreak.Load(gamedir + "\\Configs\\Config_Streak.xml");
             XmlNode maxMultiplier = configStreak.SelectNodes("Config/MaxMultiplier")[0];
             XmlNode streakPerMultiplierLevel = configStreak.SelectNodes("Config/StreakPerMultiplierLevel")[0];
+            XmlNode streakValueExpertTen = configStreak.SelectNodes("Config/StreakValueExpert10")[0];
 
             pointsPerNote.Value = Convert.ToInt32(singleNoteScore.InnerText);
             maximumMultiplier.Value = Convert.ToInt32(maxMultiplier.InnerText);
             notesPerMultiplier.Value = Convert.ToInt32(streakPerMultiplierLevel.InnerText);
+            noteStreakFix.Checked = (streakValueExpertTen.InnerText == "999999");
 
             XmlDocument gameui = new XmlDocument();
             gameui.Load(gamedir + "\\UI\\GameUI.xml");
@@ -115,31 +147,20 @@ namespace GHLCP
                     showFSGSplash.Checked = true;
                 }
             }
-
-            if (platform == "Wii U")
-            {
-                XmlDocument rendergeneral = new XmlDocument();
-                rendergeneral.Load(gamedir + "\\Configs\\RenderGeneral.xml");
-                XmlElement videotarget = (XmlElement)rendergeneral.SelectNodes("/config/Texture[@Name='VideoTarget']")[0];
-                if (videotarget.GetAttribute("Width") == "0" && videotarget.GetAttribute("Height") == "0")
-                {
-                    disableBGVideo.Checked = true;
-                }
-            } else
-            {
-                disableBGVideo.Enabled = false;
-            }
         }
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
-            MessageBox.Show("Please select the executable of your Guitar Hero Live installation.\nSupported Consoles: Wii U, Xbox 360, PlayStation 3 and iOS", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Please select the executable of your Guitar Hero Live installation.\nSupported Consoles: Wii U, Xbox 360, PlayStation 3. iOS support is experimental!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            GameFinderDialog.FileName = Properties.Settings.Default.pastFile;
             if (GameFinderDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
                     List<String> filenames = GameFinderDialog.FileName.Split('\\').ToList<String>();
                     string filename = filenames[filenames.Count - 1];
+                    Properties.Settings.Default.pastFile = String.Join("\\", filenames);
+                    Properties.Settings.Default.Save();
                     switch (filename)
                     {
                         case "GHLive.rpx":
@@ -152,18 +173,20 @@ namespace GHLCP
                         case "EBOOT.BIN":
                             platform = "PlayStation 3";
                             filenames.Remove(filename);
+                            Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
                             gamedir = String.Join("\\", filenames);
                             break;
                         case "default.xex":
                             platform = "Xbox 360";
                             filenames.Remove(filename);
+                            Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
                             gamedir = String.Join("\\", filenames);
                             break;
                         case "GHLive":
                             platform = "iOS";
                             filenames.Remove(filename);
+                            Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
                             gamedir = String.Join("\\", filenames);
-                            MessageBox.Show("iOS does not currently support importing GHLCP compatible songs.");
                             break;
                         default:
                             MessageBox.Show("That isn't a Guitar Hero Live executable!");
@@ -188,6 +211,12 @@ namespace GHLCP
                 Application.Exit();
                 return;
             }
+            if (File.Exists(gamedir + "\\FAR\\DiscOnly\\GameBoot.far"))
+            {
+                MessageBox.Show("\"gameboot.far\" exists in your GHL install directory. GHLCP will now remove this to enable custom tracks to appear in the quickplay menu.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                File.Delete(gamedir + "\\FAR\\DiscOnly\\GameBoot.far");
+                return;
+            }
             Text = $"Guitar Hero Live Control Panel ({platform})";
             PopulateInstalled();
             PopulateActive();
@@ -208,6 +237,10 @@ namespace GHLCP
                     skipfirst = false;
                 }
             }
+
+            // hack to bring window to front.
+            this.TopMost = true;
+            this.TopMost = false;
         }
 
         private void installedRefresh_Click(object sender, EventArgs e)
@@ -238,7 +271,7 @@ namespace GHLCP
             XmlElement elem = tracklisting.CreateElement("Tracks");
             elem.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
             elem.SetAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
-            foreach (ListViewItem item in installedListView.Items)
+            foreach (ListViewItem item in activeListView.Items)
             {
                 XmlElement trackelem = tracklisting.CreateElement("Track");
                 trackelem.SetAttribute("id", item.SubItems[0].Text);
@@ -392,11 +425,6 @@ namespace GHLCP
 
         private void importTracksItem_Click(object sender, EventArgs e)
         {
-            if (platform == "iOS")
-            {
-                MessageBox.Show("iOS does not currently support importing songs through the Control Panel.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
             if (ImportSongDialog.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -415,153 +443,55 @@ namespace GHLCP
 
         private void HandleImport(string filename)
         {
-            string filenameNP = filename.Split('\\')[filename.Split('\\').Length - 1];
-            decimal filesize = Math.Round((decimal)File.ReadAllText(filename).Length/1000000, 2);
             using (ZipArchive archive = ZipFile.OpenRead(filename))
             {
-                var metadata = archive.GetEntry("meta.xml");
-                if (metadata != null)
+                string manifestfile = "";
+                string songID = "";
+                foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    using (var zipEntryStream = metadata.Open())
+                    List<string> pathElements = entry.FullName.Split('/').ToList();
+                    if (pathElements.Count == 2)
                     {
-                        XmlDocument meta = new XmlDocument();
-                        meta.Load(zipEntryStream);
-                        bool compatible = false;
-                        foreach (XmlNode platformnode in meta.SelectNodes("SongInfo/Platforms/Platform"))
+                        songID = pathElements[0];
+                    } else if (pathElements.Count >= 4)
+                    {
+                        string path = "";
+                        string extractFor = pathElements[1].ToLower();
+                        pathElements.RemoveRange(0, 2);
+                        path = string.Join("/", pathElements);
+                        bool shouldExtract = false;
+                        if (extractFor == "master" && platform != "iOS") shouldExtract = true;
+                        if (extractFor == "360" && platform == "Xbox 360") shouldExtract = true;
+                        if (extractFor == "ios" && platform == "iOS") shouldExtract = true;
+                        if (extractFor == "ps4" && platform == "PlayStation 4") shouldExtract = true;
+                        if (extractFor == "others" && (platform == "PlayStation 4" || platform == "iOS")) shouldExtract = true;
+                        if (extractFor == "ps3" && platform == "PlayStation 3")
                         {
-                            if (platformnode.InnerText == platform)
-                            {
-                                compatible = true;
-                            }
+                            shouldExtract = true;
+                            path = string.Join("/", pathElements).ToUpper();
                         }
-                        if (!compatible)
+                        if (shouldExtract)
                         {
-                            MessageBox.Show($"\"{filenameNP}\" is not compatible with your current platform. ({platform})", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        DialogResult result = MessageBox.Show($"Are you sure you want to import \"{filenameNP}\"?\n" +
-                            $"{meta.SelectNodes("SongInfo/Artist")[0].InnerText} - {meta.SelectNodes("SongInfo/Title")[0].InnerText}\n" +
-                            $"Charted by: {meta.SelectNodes("SongInfo/Charter")[0].InnerText}\n" +
-                            $"Filesize: {filesize} MB", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                        string songID = meta.SelectNodes("SongInfo/ID")[0].InnerText;
-                        if (result == DialogResult.Yes)
-                        {
-                            string manifestfile = "";
-                            waitingform.Show(this);
-                            foreach (ZipArchiveEntry entry in archive.Entries)
+                            if (!entry.FullName.EndsWith("/"))
                             {
-                                if (!entry.FullName.EndsWith("/"))
+                                manifestfile += path + "\n";
+                                pathElements.RemoveAt(pathElements.Count - 1);
+                                string folderPath = string.Join("/", pathElements);
+                                if (!Directory.Exists(gamedir + "\\" + folderPath))
                                 {
-                                    if (entry.FullName.StartsWith("Generic/"))
-                                    {
-                                        Console.WriteLine($"Extracting \"{entry.FullName}\" to \"{gamedir + "\\" + entry.FullName.Replace("Generic/", "")}\"");
-                                        if (platform == "PlayStation 3")
-                                        {
-                                            manifestfile += entry.FullName.ToUpper().Replace("GENERIC/", "") + "\n";
-                                            entry.ExtractToFile(gamedir + "\\" + entry.FullName.ToUpper().Replace("GENERIC/", ""));
-                                        }
-                                        else
-                                        {
-                                            manifestfile += entry.FullName.Replace("Generic/", "") + "\n";
-                                            entry.ExtractToFile(gamedir + "\\" + entry.FullName.Replace("Generic/", ""));
-                                        }
-                                    }
-                                    if (entry.FullName.StartsWith("Vorbis/") && platform != "iOS")
-                                    {
-                                        Console.WriteLine($"Extracting \"{entry.FullName}\" to \"{gamedir + "\\" + entry.FullName.Replace("Vorbis/", "")}\"");
-                                        if (platform == "PlayStation 3")
-                                        {
-                                            manifestfile += entry.FullName.ToUpper().Replace("VORBIS/", "") + "\n";
-                                            entry.ExtractToFile(gamedir + "\\" + entry.FullName.ToUpper().Replace("VORBIS/", ""));
-                                        }
-                                        else
-                                        {
-                                            manifestfile += entry.FullName.Replace("Vorbis/", "") + "\n";
-                                            entry.ExtractToFile(gamedir + "\\" + entry.FullName.Replace("Vorbis/", ""));
-                                        }
-                                    }
-                                    if (entry.FullName.StartsWith("MP4/") && platform != "Xbox 360")
-                                    {
-                                        Console.WriteLine($"Extracting \"{entry.FullName}\" to \"{gamedir + "\\" + entry.FullName.Replace("MP4/", "")}\"");
-                                        if (platform == "PlayStation 3")
-                                        {
-                                            manifestfile += entry.FullName.ToUpper().Replace("MP4/", "") + "\n";
-                                            entry.ExtractToFile(gamedir + "\\" + entry.FullName.ToUpper().Replace("MP4/", ""));
-                                        }
-                                        else
-                                        {
-                                            manifestfile += entry.FullName.Replace("MP4/", "") + "\n";
-                                            entry.ExtractToFile(gamedir + "\\" + entry.FullName.Replace("MP4/", ""));
-                                        }
-                                    }
-                                } else
-                                {
-                                    if (entry.FullName.StartsWith("Generic/"))
-                                    {
-                                        if (!Directory.Exists(gamedir + "\\" + entry.FullName.Replace("Generic/", "")))
-                                        {
-                                            Console.WriteLine($"Creating \"{entry.FullName}\" in \"{gamedir + "\\" + entry.FullName.Replace("Generic/", "")}\"");
-                                            if (platform == "PlayStation 3")
-                                            {
-                                                Directory.CreateDirectory(gamedir + "\\" + entry.FullName.ToUpper().Replace("GENERIC/", ""));
-                                            }
-                                            else
-                                            {
-                                                Directory.CreateDirectory(gamedir + "\\" + entry.FullName.Replace("Generic/", ""));
-                                            }
-                                        }
-                                    }
-                                    if (entry.FullName.StartsWith("Vorbis/") && platform != "iOS")
-                                    {
-                                        if (!Directory.Exists(gamedir + "\\" + entry.FullName.Replace("Vorbis/", "")))
-                                        {
-                                            Console.WriteLine($"Creating \"{entry.FullName}\" in \"{gamedir + "\\" + entry.FullName.Replace("Vorbis/", "")}\"");
-                                            if (platform == "PlayStation 3")
-                                            {
-                                                Directory.CreateDirectory(gamedir + "\\" + entry.FullName.ToUpper().Replace("VORBIS/", ""));
-                                            }
-                                            else
-                                            {
-                                                Directory.CreateDirectory(gamedir + "\\" + entry.FullName.Replace("Vorbis/", ""));
-                                            }
-                                        }
-                                    }
-                                    if (entry.FullName.StartsWith("MP4/") && platform != "Xbox 360" && platform != "iOS")
-                                    {
-                                        if (!Directory.Exists(gamedir + "\\" + entry.FullName.Replace("MP4/", "")))
-                                        {
-                                            Console.WriteLine($"Creating \"{entry.FullName}\" in \"{gamedir + "\\" + entry.FullName.Replace("MP4/", "")}\"");
-                                            if (platform == "PlayStation 3")
-                                            {
-                                                Directory.CreateDirectory(gamedir + "\\" + entry.FullName.ToUpper().Replace("MP4/", ""));
-                                            }
-                                            else
-                                            {
-                                                Directory.CreateDirectory(gamedir + "\\" + entry.FullName.Replace("MP4/", ""));
-                                            }
-                                        }
-                                    }
-                                    if (entry.FullName.StartsWith("webm/") && platform == "Xbox 360")
-                                    {
-                                        if (!Directory.Exists(gamedir + "\\" + entry.FullName.Replace("webm/", "")))
-                                        {
-                                            Console.WriteLine($"Creating \"{entry.FullName}\" in \"{gamedir + "\\" + entry.FullName.Replace("webm/", "")}\"");
-                                            Directory.CreateDirectory(gamedir + "\\" + entry.FullName.Replace("webm/", ""));
-                                        }
-                                    }
+                                    Console.WriteLine($"Creating \"{entry.FullName}\" in \"{gamedir + "\\" + folderPath}\"");
+                                    Directory.CreateDirectory(gamedir + "\\" + folderPath);
                                 }
+                                Console.WriteLine($"Copying \"{entry.FullName}\" to \"{gamedir + "\\" + path}\"");
+                                entry.ExtractToFile(gamedir + "\\" + path, true);
                             }
-                            File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + songID + "\\manifest.txt", manifestfile);
-                            waitingform.Hide();
-                            PopulateInstalled();
                         }
                     }
-                } else
-                {
-                    MessageBox.Show($"\"{filenameNP}\" is not a valid GHLCP importable song.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
                 }
+                File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + songID + "\\manifest.txt", manifestfile);
             }
+            PopulateActive();
+            PopulateInstalled();
         }
 
         private void installedRemove_Click(object sender, EventArgs e)
@@ -614,13 +544,24 @@ namespace GHLCP
             configStreak.Load(gamedir + "\\Configs\\Config_Streak.xml");
             XmlNode maxMultiplier = configStreak.SelectNodes("Config/MaxMultiplier")[0];
             XmlNode streakPerMultiplierLevel = configStreak.SelectNodes("Config/StreakPerMultiplierLevel")[0];
+            XmlNode streakValueExpertTen = configStreak.SelectNodes("Config/StreakValueExpert10")[0];
 
             singleNoteScore.InnerText = pointsPerNote.Value.ToString();
             maxMultiplier.InnerText = maximumMultiplier.Value.ToString();
             streakPerMultiplierLevel.InnerText = notesPerMultiplier.Value.ToString();
+            if (noteStreakFix.Checked)
+            {
+                streakValueExpertTen.InnerText = "999999";
+            } else
+            {
+                streakValueExpertTen.InnerText = "900";
+            }
             
-            File.Copy(gamedir + "\\Audio\\AudioTracks\\Setlists.xml", gamedir + "\\Audio\\AudioTracks\\Setlists.xml.bak", true);
-            File.Copy(gamedir + "\\Audio\\AudioTracks\\Tracklisting.xml", gamedir + "\\Audio\\AudioTracks\\Tracklisting.xml.bak", true);
+            if (!File.Exists(gamedir + "\\Audio\\AudioTracks\\Setlists.xml.bak") || !File.Exists(gamedir + "\\Audio\\AudioTracks\\Tracklisting.xml.bak"))
+            {
+                File.Copy(gamedir + "\\Audio\\AudioTracks\\Setlists.xml", gamedir + "\\Audio\\AudioTracks\\Setlists.xml.bak", true);
+                File.Copy(gamedir + "\\Audio\\AudioTracks\\Tracklisting.xml", gamedir + "\\Audio\\AudioTracks\\Tracklisting.xml.bak", true);
+            }
             File.WriteAllText(gamedir + "\\Configs\\ConfigScore.xml", configScore.OuterXml);
             File.WriteAllText(gamedir + "\\Configs\\Config_Streak.xml", configStreak.OuterXml);
 
@@ -660,25 +601,6 @@ namespace GHLCP
 
             File.Copy(gamedir + "\\UI\\GameUI.xml", gamedir + "\\UI\\GameUI.xml.bak", true);
             File.WriteAllText(gamedir + "\\UI\\GameUI.xml", gameui.OuterXml);
-
-            if (platform == "Wii U")
-            {
-                XmlDocument rendergeneral = new XmlDocument();
-                rendergeneral.Load(gamedir + "\\Configs\\RenderGeneral.xml");
-                XmlElement videotarget = (XmlElement)rendergeneral.SelectNodes("/config/Texture[@Name='VideoTarget']")[0];
-                if (disableBGVideo.Checked)
-                {
-                    videotarget.SetAttribute("Width", "0");
-                    videotarget.SetAttribute("Height", "0");
-                } else
-                {
-                    videotarget.SetAttribute("Width", "960");
-                    videotarget.SetAttribute("Height", "540");
-                }
-                File.Copy(gamedir + "\\Configs\\RenderGeneral.xml", gamedir + "\\Configs\\RenderGeneral.xml.bak", true);
-                File.WriteAllText(gamedir + "\\Configs\\RenderGeneral.xml", rendergeneral.OuterXml);
-            }
-
             MessageBox.Show("Saved modified game files!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -768,6 +690,47 @@ namespace GHLCP
                 File.Copy(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml", gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml.bak", true);
                 File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml", document.OuterXml);
             }
+        }
+
+        private void enableCustomVIdeosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in installedListView.Items)
+            {
+                if (!defaultTracks.Contains(item.SubItems[0].Text))
+                {
+                    XmlDocument document = new XmlDocument();
+                    document.Load(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml");
+                    XmlNode video = document.SelectSingleNode("Track/Video");
+                    ((XmlElement)video).SetAttribute("hasVideo", "true");
+                    File.Copy(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml", gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml.bak", true);
+                    File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml", document.OuterXml);
+                }
+            }
+        }
+    }
+    // Implements the manual sorting of items by columns.
+    class ListViewItemComparer : IComparer
+    {
+        public bool descending = false;
+        public int col;
+        public ListViewItemComparer()
+        {
+            col = 0;
+        }
+        public ListViewItemComparer(int column)
+        {
+            col = column;
+        }
+        public int Compare(object x, object y)
+        {
+            if (descending)
+            {
+                return String.Compare(((ListViewItem)y).SubItems[col].Text, ((ListViewItem)x).SubItems[col].Text);
+            } else
+            {
+                return String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
+            }
+            
         }
     }
 }

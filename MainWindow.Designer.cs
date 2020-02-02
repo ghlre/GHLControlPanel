@@ -54,6 +54,7 @@
             this.activeRefresh = new System.Windows.Forms.Button();
             this.activeEdit = new System.Windows.Forms.Button();
             this.gameHacks = new System.Windows.Forms.TabPage();
+            this.noteStreakFix = new System.Windows.Forms.CheckBox();
             this.batchHyperspeed = new System.Windows.Forms.GroupBox();
             this.speedXBox = new System.Windows.Forms.NumericUpDown();
             this.spxlabel = new System.Windows.Forms.Label();
@@ -67,8 +68,6 @@
             this.spblabel = new System.Windows.Forms.Label();
             this.applyHyperspeed = new System.Windows.Forms.Button();
             this.irreversibleWarning = new System.Windows.Forms.Label();
-            this.renderSettingsConfig = new System.Windows.Forms.GroupBox();
-            this.disableBGVideo = new System.Windows.Forms.CheckBox();
             this.gameStartupConfig = new System.Windows.Forms.GroupBox();
             this.showFSGSplash = new System.Windows.Forms.CheckBox();
             this.showActiSplash = new System.Windows.Forms.CheckBox();
@@ -92,6 +91,10 @@
             this.tracksStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.downloadTracksItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importTracksItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.disableVideosItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.disableAllVideosItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableCustomVIdeosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.updatesItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutSeperator = new System.Windows.Forms.ToolStripSeparator();
@@ -99,9 +102,6 @@
             this.fuckYouActivision = new System.Windows.Forms.ToolStripMenuItem();
             this.ImportSongDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveCSVDialog = new System.Windows.Forms.SaveFileDialog();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.disableVideosItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.disableAllVideosItem = new System.Windows.Forms.ToolStripMenuItem();
             this.songTabs.SuspendLayout();
             this.installedTracks.SuspendLayout();
             this.installedControls.SuspendLayout();
@@ -114,7 +114,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.speedMBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.speedEBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.speedBBox)).BeginInit();
-            this.renderSettingsConfig.SuspendLayout();
             this.gameStartupConfig.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.hmm)).BeginInit();
             this.scoringGroup.SuspendLayout();
@@ -362,8 +361,8 @@
             // gameHacks
             // 
             this.gameHacks.AutoScroll = true;
+            this.gameHacks.Controls.Add(this.noteStreakFix);
             this.gameHacks.Controls.Add(this.batchHyperspeed);
-            this.gameHacks.Controls.Add(this.renderSettingsConfig);
             this.gameHacks.Controls.Add(this.gameStartupConfig);
             this.gameHacks.Controls.Add(this.GHTVMaxUpgrades);
             this.gameHacks.Controls.Add(this.hmm);
@@ -379,6 +378,16 @@
             this.gameHacks.TabIndex = 2;
             this.gameHacks.Text = "Game Modifications";
             this.gameHacks.UseVisualStyleBackColor = true;
+            // 
+            // noteStreakFix
+            // 
+            this.noteStreakFix.AutoSize = true;
+            this.noteStreakFix.Location = new System.Drawing.Point(243, 100);
+            this.noteStreakFix.Name = "noteStreakFix";
+            this.noteStreakFix.Size = new System.Drawing.Size(182, 17);
+            this.noteStreakFix.TabIndex = 10;
+            this.noteStreakFix.Text = "Apply 900 Note Streak Expert Fix";
+            this.noteStreakFix.UseVisualStyleBackColor = true;
             // 
             // batchHyperspeed
             // 
@@ -530,26 +539,6 @@
             this.irreversibleWarning.Size = new System.Drawing.Size(160, 13);
             this.irreversibleWarning.TabIndex = 0;
             this.irreversibleWarning.Text = "This change is IRREVERSIBLE!";
-            // 
-            // renderSettingsConfig
-            // 
-            this.renderSettingsConfig.Controls.Add(this.disableBGVideo);
-            this.renderSettingsConfig.Location = new System.Drawing.Point(232, 96);
-            this.renderSettingsConfig.Name = "renderSettingsConfig";
-            this.renderSettingsConfig.Size = new System.Drawing.Size(291, 49);
-            this.renderSettingsConfig.TabIndex = 8;
-            this.renderSettingsConfig.TabStop = false;
-            this.renderSettingsConfig.Text = "Render Settings";
-            // 
-            // disableBGVideo
-            // 
-            this.disableBGVideo.AutoSize = true;
-            this.disableBGVideo.Location = new System.Drawing.Point(11, 20);
-            this.disableBGVideo.Name = "disableBGVideo";
-            this.disableBGVideo.Size = new System.Drawing.Size(152, 17);
-            this.disableBGVideo.TabIndex = 0;
-            this.disableBGVideo.Text = "Disable Background Video";
-            this.disableBGVideo.UseVisualStyleBackColor = true;
             // 
             // gameStartupConfig
             // 
@@ -777,7 +766,8 @@
             this.importTracksItem,
             this.toolStripSeparator1,
             this.disableVideosItem,
-            this.disableAllVideosItem});
+            this.disableAllVideosItem,
+            this.enableCustomVIdeosToolStripMenuItem});
             this.tracksStrip.Name = "tracksStrip";
             this.tracksStrip.Size = new System.Drawing.Size(51, 20);
             this.tracksStrip.Text = "Tracks";
@@ -786,15 +776,41 @@
             // 
             this.downloadTracksItem.Enabled = false;
             this.downloadTracksItem.Name = "downloadTracksItem";
-            this.downloadTracksItem.Size = new System.Drawing.Size(182, 22);
+            this.downloadTracksItem.Size = new System.Drawing.Size(192, 22);
             this.downloadTracksItem.Text = "Download Tracks";
             // 
             // importTracksItem
             // 
             this.importTracksItem.Name = "importTracksItem";
-            this.importTracksItem.Size = new System.Drawing.Size(182, 22);
+            this.importTracksItem.Size = new System.Drawing.Size(192, 22);
             this.importTracksItem.Text = "Import Tracks";
             this.importTracksItem.Click += new System.EventHandler(this.importTracksItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(189, 6);
+            // 
+            // disableVideosItem
+            // 
+            this.disableVideosItem.Name = "disableVideosItem";
+            this.disableVideosItem.Size = new System.Drawing.Size(192, 22);
+            this.disableVideosItem.Text = "Disable Stock Videos";
+            this.disableVideosItem.Click += new System.EventHandler(this.disableVideosItem_Click);
+            // 
+            // disableAllVideosItem
+            // 
+            this.disableAllVideosItem.Name = "disableAllVideosItem";
+            this.disableAllVideosItem.Size = new System.Drawing.Size(192, 22);
+            this.disableAllVideosItem.Text = "Disable All Videos";
+            this.disableAllVideosItem.Click += new System.EventHandler(this.disableAllVideosItem_Click);
+            // 
+            // enableCustomVIdeosToolStripMenuItem
+            // 
+            this.enableCustomVIdeosToolStripMenuItem.Name = "enableCustomVIdeosToolStripMenuItem";
+            this.enableCustomVIdeosToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.enableCustomVIdeosToolStripMenuItem.Text = "Enable Custom Videos";
+            this.enableCustomVIdeosToolStripMenuItem.Click += new System.EventHandler(this.enableCustomVIdeosToolStripMenuItem_Click);
             // 
             // aboutStrip
             // 
@@ -844,25 +860,6 @@
             this.saveCSVDialog.Filter = "CSV file|*.csv|All files|*.*";
             this.saveCSVDialog.Title = "Export Songlist CSV";
             // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(179, 6);
-            // 
-            // disableVideosItem
-            // 
-            this.disableVideosItem.Name = "disableVideosItem";
-            this.disableVideosItem.Size = new System.Drawing.Size(182, 22);
-            this.disableVideosItem.Text = "Disable Stock Videos";
-            this.disableVideosItem.Click += new System.EventHandler(this.disableVideosItem_Click);
-            // 
-            // disableAllVideosItem
-            // 
-            this.disableAllVideosItem.Name = "disableAllVideosItem";
-            this.disableAllVideosItem.Size = new System.Drawing.Size(182, 22);
-            this.disableAllVideosItem.Text = "Disable All Videos";
-            this.disableAllVideosItem.Click += new System.EventHandler(this.disableAllVideosItem_Click);
-            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -889,8 +886,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.speedMBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.speedEBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.speedBBox)).EndInit();
-            this.renderSettingsConfig.ResumeLayout(false);
-            this.renderSettingsConfig.PerformLayout();
             this.gameStartupConfig.ResumeLayout(false);
             this.gameStartupConfig.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.hmm)).EndInit();
@@ -965,8 +960,6 @@
         private System.Windows.Forms.CheckBox showActiSplash;
         private System.Windows.Forms.GroupBox batchHyperspeed;
         private System.Windows.Forms.Label irreversibleWarning;
-        private System.Windows.Forms.GroupBox renderSettingsConfig;
-        private System.Windows.Forms.CheckBox disableBGVideo;
         private System.Windows.Forms.Button applyHyperspeed;
         private System.Windows.Forms.NumericUpDown speedXBox;
         private System.Windows.Forms.Label spxlabel;
@@ -983,6 +976,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem disableVideosItem;
         private System.Windows.Forms.ToolStripMenuItem disableAllVideosItem;
+        private System.Windows.Forms.ToolStripMenuItem enableCustomVIdeosToolStripMenuItem;
+        private System.Windows.Forms.CheckBox noteStreakFix;
     }
 }
 

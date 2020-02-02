@@ -78,6 +78,7 @@
     <Compile Include="EditSong.Designer.cs">
       <DependentUpon>EditSong.cs</DependentUpon>
     </Compile>
+    <Compile Include="FileManager.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>

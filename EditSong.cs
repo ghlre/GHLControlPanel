@@ -93,8 +93,15 @@ namespace GHLCP
                 quickStartBox.Enabled = false;
             } else
             {
-                enableStagefright.Checked = true;
-                parentSetlistBox.Text = ((XmlElement)stagefright).GetAttributeNode("parentSetlist").InnerText;
+                if (((XmlElement)stagefright).HasAttribute("parentSetlist"))
+                {
+                    enableStagefright.Checked = true;
+                    parentSetlistBox.Text = ((XmlElement)stagefright).GetAttributeNode("parentSetlist").InnerText;
+                } else if (((XmlElement)stagefright).HasAttribute("parentSetlistDisabled"))
+                {
+                    enableStagefright.Checked = false;
+                    parentSetlistBox.Text = ((XmlElement)stagefright).GetAttributeNode("parentSetlistDisabled").InnerText;
+                }
                 careerStartBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("trackStartTime").InnerText);
                 careerEndBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("trackEndTime").InnerText);
                 quickStartBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("quickplayStartTime").InnerText);
@@ -133,24 +140,6 @@ namespace GHLCP
 
         private void videoEnabledCheck_CheckedChanged(object sender, EventArgs e)
         {
-            if (dontAlertChanges)
-            {
-                return;
-            }
-            if (!defaultTracks.Contains(idToGet))
-            {
-                DialogResult yeah = MessageBox.Show("Disabling videos on current custom songs may cause problems such as audio not playing. Are you sure you want to do this?", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                switch (yeah)
-                {
-                    case DialogResult.Yes:
-                        break;
-                    case DialogResult.No:
-                        dontAlertChanges = true;
-                        videoEnabledCheck.Checked = !videoEnabledCheck.Checked;
-                        dontAlertChanges = false;
-                        return;
-                }
-            }
             videoStartBox.Enabled = videoEnabledCheck.Checked;
         }
 
@@ -174,11 +163,6 @@ namespace GHLCP
                         break;
                 }
             }
-            parentSetlistBox.Enabled = enableStagefright.Checked;
-            careerStartBox.Enabled = enableStagefright.Checked;
-            careerEndBox.Enabled = enableStagefright.Checked;
-            quickEndBox.Enabled = enableStagefright.Checked;
-            quickStartBox.Enabled = enableStagefright.Checked;
         }
 
         private void saveTrack_Click(object sender, EventArgs e)
@@ -243,14 +227,29 @@ namespace GHLCP
             }
             else
             {
-                ((XmlElement)stagefright).SetAttribute("parentSetlist", parentSetlistBox.Text);
-                ((XmlElement)stagefright).SetAttribute("trackStartTime", careerStartBox.Value.ToString());
-                ((XmlElement)stagefright).SetAttribute("trackEndTime", careerEndBox.Value.ToString());
-                ((XmlElement)stagefright).SetAttribute("quickplayStartTime", quickStartBox.Value.ToString());
-                ((XmlElement)stagefright).SetAttribute("quickplayEndTime", quickEndBox.Value.ToString());
+                if (parentSetlistBox.Text != "")
+                {
+                    if (enableStagefright.Checked)
+                    {
+                        ((XmlElement)stagefright).RemoveAttribute("parentSetlistDisabled");
+                        ((XmlElement)stagefright).SetAttribute("parentSetlist", parentSetlistBox.Text);
+                    }
+                    else
+                    {
+                        ((XmlElement)stagefright).RemoveAttribute("parentSetlist");
+                        ((XmlElement)stagefright).SetAttribute("parentSetlistDisabled", parentSetlistBox.Text);
+                    }
+                    ((XmlElement)stagefright).SetAttribute("trackStartTime", careerStartBox.Value.ToString());
+                    ((XmlElement)stagefright).SetAttribute("trackEndTime", careerEndBox.Value.ToString());
+                    ((XmlElement)stagefright).SetAttribute("quickplayStartTime", quickStartBox.Value.ToString());
+                    ((XmlElement)stagefright).SetAttribute("quickplayEndTime", quickEndBox.Value.ToString());
+                }
             }
             
-            File.Copy(gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml", gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml.bak", true);
+            if (!File.Exists(gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml.bak"))
+            {
+                File.Copy(gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml", gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml.bak", true);
+            }
             File.WriteAllText(gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml", document.OuterXml);
 
             Close();

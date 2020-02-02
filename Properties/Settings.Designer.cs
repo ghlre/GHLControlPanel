@@ -22,5 +22,29 @@ namespace GHLCP.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string initialDirectory {
+            get {
+                return ((string)(this["initialDirectory"]));
+            }
+            set {
+                this["initialDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string pastFile {
+            get {
+                return ((string)(this["pastFile"]));
+            }
+            set {
+                this["pastFile"] = value;
+            }
+        }
     }
 }
