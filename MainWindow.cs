@@ -491,6 +491,14 @@ namespace GHLCP
                     }
                 }
                 File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + songID + "\\manifest.txt", manifestfile);
+                if (platform == "iOS")
+                {
+                    XmlDocument document = new XmlDocument();
+                    document.Load(gamedir + "\\Audio\\AudioTracks\\" + songID + "\\trackconfig.xml");
+                    XmlNode video = document.SelectSingleNode("Track/Video");
+                    ((XmlElement)video).SetAttribute("hasVideo", "false");
+                    File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + songID + "\\trackconfig.xml", document.OuterXml);
+                }
             }
         }
 
