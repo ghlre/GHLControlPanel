@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.GameFinderDialog = new System.Windows.Forms.OpenFileDialog();
             this.installedListView = new System.Windows.Forms.ListView();
@@ -48,6 +49,8 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.contextMenuStripActiveList = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.removeFromQuickplayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.activeControls = new System.Windows.Forms.Panel();
             this.exportCSVButton = new System.Windows.Forms.Button();
             this.activeRemove = new System.Windows.Forms.Button();
@@ -102,10 +105,12 @@
             this.fuckYouActivision = new System.Windows.Forms.ToolStripMenuItem();
             this.ImportSongDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveCSVDialog = new System.Windows.Forms.SaveFileDialog();
+            this.trackCountLabel = new System.Windows.Forms.Label();
             this.songTabs.SuspendLayout();
             this.installedTracks.SuspendLayout();
             this.installedControls.SuspendLayout();
             this.activeTracks.SuspendLayout();
+            this.contextMenuStripActiveList.SuspendLayout();
             this.activeControls.SuspendLayout();
             this.gameHacks.SuspendLayout();
             this.batchHyperspeed.SuspendLayout();
@@ -272,10 +277,10 @@
             this.columnHeader2,
             this.columnHeader3,
             this.columnHeader4});
+            this.activeListView.ContextMenuStrip = this.contextMenuStripActiveList;
             this.activeListView.FullRowSelect = true;
             this.activeListView.HideSelection = false;
             this.activeListView.Location = new System.Drawing.Point(6, 6);
-            this.activeListView.MultiSelect = false;
             this.activeListView.Name = "activeListView";
             this.activeListView.ShowGroups = false;
             this.activeListView.Size = new System.Drawing.Size(524, 453);
@@ -302,8 +307,23 @@
             // 
             this.columnHeader4.Text = "Intensity";
             // 
+            // contextMenuStripActiveList
+            // 
+            this.contextMenuStripActiveList.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.removeFromQuickplayToolStripMenuItem});
+            this.contextMenuStripActiveList.Name = "contextMenuStripActiveList";
+            this.contextMenuStripActiveList.Size = new System.Drawing.Size(203, 26);
+            // 
+            // removeFromQuickplayToolStripMenuItem
+            // 
+            this.removeFromQuickplayToolStripMenuItem.Name = "removeFromQuickplayToolStripMenuItem";
+            this.removeFromQuickplayToolStripMenuItem.Size = new System.Drawing.Size(202, 22);
+            this.removeFromQuickplayToolStripMenuItem.Text = "Remove from Quickplay";
+            this.removeFromQuickplayToolStripMenuItem.Click += new System.EventHandler(this.activeRemove_Click);
+            // 
             // activeControls
             // 
+            this.activeControls.Controls.Add(this.trackCountLabel);
             this.activeControls.Controls.Add(this.exportCSVButton);
             this.activeControls.Controls.Add(this.activeRemove);
             this.activeControls.Controls.Add(this.activeRefresh);
@@ -748,14 +768,16 @@
             // buildXMLItem
             // 
             this.buildXMLItem.Name = "buildXMLItem";
-            this.buildXMLItem.Size = new System.Drawing.Size(204, 22);
+            this.buildXMLItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.B)));
+            this.buildXMLItem.Size = new System.Drawing.Size(246, 22);
             this.buildXMLItem.Text = "Build Setlists/Tracklisting";
             this.buildXMLItem.Click += new System.EventHandler(this.buildXMLItem_Click);
             // 
             // saveModsItem
             // 
             this.saveModsItem.Name = "saveModsItem";
-            this.saveModsItem.Size = new System.Drawing.Size(204, 22);
+            this.saveModsItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveModsItem.Size = new System.Drawing.Size(246, 22);
             this.saveModsItem.Text = "Save Modifications";
             this.saveModsItem.Click += new System.EventHandler(this.saveModsItem_Click);
             // 
@@ -860,6 +882,15 @@
             this.saveCSVDialog.Filter = "CSV file|*.csv|All files|*.*";
             this.saveCSVDialog.Title = "Export Songlist CSV";
             // 
+            // trackCountLabel
+            // 
+            this.trackCountLabel.AutoSize = true;
+            this.trackCountLabel.Location = new System.Drawing.Point(143, 8);
+            this.trackCountLabel.Name = "trackCountLabel";
+            this.trackCountLabel.Size = new System.Drawing.Size(71, 13);
+            this.trackCountLabel.TabIndex = 5;
+            this.trackCountLabel.Text = "Track count: ";
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -876,7 +907,9 @@
             this.installedTracks.ResumeLayout(false);
             this.installedControls.ResumeLayout(false);
             this.activeTracks.ResumeLayout(false);
+            this.contextMenuStripActiveList.ResumeLayout(false);
             this.activeControls.ResumeLayout(false);
+            this.activeControls.PerformLayout();
             this.gameHacks.ResumeLayout(false);
             this.gameHacks.PerformLayout();
             this.batchHyperspeed.ResumeLayout(false);
@@ -978,6 +1011,9 @@
         private System.Windows.Forms.ToolStripMenuItem disableAllVideosItem;
         private System.Windows.Forms.ToolStripMenuItem enableCustomVIdeosToolStripMenuItem;
         private System.Windows.Forms.CheckBox noteStreakFix;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripActiveList;
+        private System.Windows.Forms.ToolStripMenuItem removeFromQuickplayToolStripMenuItem;
+        private System.Windows.Forms.Label trackCountLabel;
     }
 }
 
