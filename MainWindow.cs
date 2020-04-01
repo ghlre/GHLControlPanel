@@ -91,6 +91,7 @@ namespace GHLCP
             activeListView.Sorting = SortOrder.Ascending;
             activeListView.ListViewItemSorter = null;
             activeListView.ColumnClick += ListView_ColumnClick;
+            trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
         }
 
         private void ListView_ColumnClick(object o, ColumnClickEventArgs e)
@@ -334,21 +335,33 @@ namespace GHLCP
 
         private void activeListView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (activeListView.SelectedIndices.Count == 0)
+            switch (activeListView.SelectedIndices.Count) 
             {
-                activeRemove.Enabled = false;
-                activeEdit.Enabled = false;
-            }
-            else
-            {
-                activeRemove.Enabled = true;
-                activeEdit.Enabled = true;
+                case 0:
+                    activeRemove.Enabled = false;
+                    activeEdit.Enabled = false; 
+                    removeFromQuickplayToolStripMenuItem.Enabled = false;
+                    break;
+
+                case 1:
+                    activeRemove.Enabled = true; 
+                    activeEdit.Enabled = true;
+                    removeFromQuickplayToolStripMenuItem.Enabled = true;
+                    break;
+
+                default:
+                    activeRemove.Enabled = true;
+                    activeEdit.Enabled = false;
+                    removeFromQuickplayToolStripMenuItem.Enabled = true;
+                    break;
             }
         }
 
         private void activeRemove_Click(object sender, EventArgs e)
         {
-            activeListView.SelectedItems[0].Remove();
+            foreach (ListViewItem item in activeListView.SelectedItems)
+                item.Remove();
+            trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
         }
 
         private void installedSetActive_Click(object sender, EventArgs e)
@@ -386,6 +399,7 @@ namespace GHLCP
                     }
                 }
             }
+            trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
         }
 
         private void activeRefresh_Click(object sender, EventArgs e)
@@ -519,6 +533,8 @@ namespace GHLCP
                     File.Delete(gamedir + "\\" + filepath);
                 }
             }
+            PopulateInstalled();
+            trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
         }
 
         private void fuckYouActivision_Click(object sender, EventArgs e)

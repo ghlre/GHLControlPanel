@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -78,7 +79,7 @@ namespace GHLCP
                 }
                 if (((XmlElement)video).HasAttribute("musicStartTime"))
                 {
-                    videoStartBox.Value = Convert.ToDecimal(((XmlElement)video).GetAttributeNode("musicStartTime").InnerText);
+                    videoStartBox.Value = Convert.ToDecimal(((XmlElement)video).GetAttributeNode("musicStartTime").InnerText, CultureInfo.InvariantCulture);
                 }
             }
 
@@ -102,29 +103,29 @@ namespace GHLCP
                     enableStagefright.Checked = false;
                     parentSetlistBox.Text = ((XmlElement)stagefright).GetAttributeNode("parentSetlistDisabled").InnerText;
                 }
-                careerStartBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("trackStartTime").InnerText);
-                careerEndBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("trackEndTime").InnerText);
-                quickStartBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("quickplayStartTime").InnerText);
-                quickEndBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("quickplayEndTime").InnerText);
+                careerStartBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("trackStartTime").InnerText, CultureInfo.InvariantCulture);
+                careerEndBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("trackEndTime").InnerText, CultureInfo.InvariantCulture);
+                quickStartBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("quickplayStartTime").InnerText, CultureInfo.InvariantCulture);
+                quickEndBox.Value = Convert.ToDecimal(((XmlElement)stagefright).GetAttributeNode("quickplayEndTime").InnerText, CultureInfo.InvariantCulture);
             }
 
             // Highway shit
             XmlNode highway = document.SelectSingleNode("Track/Highway");
-            speedBBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("newbeginner").InnerText);
-            speedEBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("neweasy").InnerText);
-            speedMBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("newmedium").InnerText);
-            speedHBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("newhard").InnerText);
-            speedXBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("newexpert").InnerText);
+            speedBBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("newbeginner").InnerText, CultureInfo.InvariantCulture);
+            speedEBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("neweasy").InnerText, CultureInfo.InvariantCulture);
+            speedMBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("newmedium").InnerText, CultureInfo.InvariantCulture);
+            speedHBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("newhard").InnerText, CultureInfo.InvariantCulture);
+            speedXBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("newexpert").InnerText, CultureInfo.InvariantCulture);
             if (((XmlElement)highway).HasAttribute("highwayOpacityMultiplier"))
             {
-                opacityBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("highwayOpacityMultiplier").InnerText);
+                opacityBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("highwayOpacityMultiplier").InnerText, CultureInfo.InvariantCulture);
             } else
             {
                 opacityBox.Enabled = false;
             }
             if (((XmlElement)highway).HasAttribute("highwayTransparency"))
             {
-                transparencyBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("highwayTransparency").InnerText);
+                transparencyBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("highwayTransparency").InnerText, CultureInfo.InvariantCulture);
             }
             else
             {
@@ -179,18 +180,18 @@ namespace GHLCP
 
             // Highway shit
             XmlNode highway = document.SelectSingleNode("Track/Highway");
-            ((XmlElement)highway).SetAttribute("newbeginner", speedBBox.Value.ToString());
-            ((XmlElement)highway).SetAttribute("neweasy", speedEBox.Value.ToString());
-            ((XmlElement)highway).SetAttribute("newmedium", speedMBox.Value.ToString());
-            ((XmlElement)highway).SetAttribute("newhard", speedHBox.Value.ToString());
-            ((XmlElement)highway).SetAttribute("newexpert", speedXBox.Value.ToString());
+            ((XmlElement)highway).SetAttribute("newbeginner", speedBBox.Value.ToString(CultureInfo.InvariantCulture));
+            ((XmlElement)highway).SetAttribute("neweasy", speedEBox.Value.ToString(CultureInfo.InvariantCulture));
+            ((XmlElement)highway).SetAttribute("newmedium", speedMBox.Value.ToString(CultureInfo.InvariantCulture));
+            ((XmlElement)highway).SetAttribute("newhard", speedHBox.Value.ToString(CultureInfo.InvariantCulture));
+            ((XmlElement)highway).SetAttribute("newexpert", speedXBox.Value.ToString(CultureInfo.InvariantCulture));
             if (opacityBox.Enabled)
             {
-                ((XmlElement)highway).SetAttribute("highwayOpacityMultiplier", opacityBox.Value.ToString());
+                ((XmlElement)highway).SetAttribute("highwayOpacityMultiplier", opacityBox.Value.ToString(CultureInfo.InvariantCulture));
             }
             if (transparencyBox.Enabled)
             {
-                ((XmlElement)highway).SetAttribute("highwayTransparency", transparencyBox.Value.ToString());
+                ((XmlElement)highway).SetAttribute("highwayTransparency", transparencyBox.Value.ToString(CultureInfo.InvariantCulture));
             }
             
             // Video shit
@@ -200,14 +201,14 @@ namespace GHLCP
                 if (videoEnabledCheck.Checked) {
                     XmlElement videoelement = document.CreateElement("Video");
                     videoelement.SetAttribute("hasVideo", boolToXml(videoEnabledCheck.Checked));
-                    videoelement.SetAttribute("musicStartTime", videoStartBox.Value.ToString());
+                    videoelement.SetAttribute("musicStartTime", videoStartBox.Value.ToString(CultureInfo.InvariantCulture));
                     trackconfig.AppendChild(videoelement);
                 }
             }
             else
             {
                 ((XmlElement)video).SetAttribute("hasVideo", boolToXml(videoEnabledCheck.Checked));
-                ((XmlElement)video).SetAttribute("musicStartTime", videoStartBox.Value.ToString());
+                ((XmlElement)video).SetAttribute("musicStartTime", videoStartBox.Value.ToString(CultureInfo.InvariantCulture));
             }
 
             // Stagefright shit
@@ -218,10 +219,10 @@ namespace GHLCP
                 {
                     XmlElement stageelement = document.CreateElement("Stagefright");
                     stageelement.SetAttribute("parentSetlist", parentSetlistBox.Text);
-                    stageelement.SetAttribute("trackStartTime", careerStartBox.Value.ToString());
-                    stageelement.SetAttribute("trackEndTime", careerEndBox.Value.ToString());
-                    stageelement.SetAttribute("quickplayStartTime", quickStartBox.Value.ToString());
-                    stageelement.SetAttribute("quickplayEndTime", quickEndBox.Value.ToString());
+                    stageelement.SetAttribute("trackStartTime", careerStartBox.Value.ToString(CultureInfo.InvariantCulture));
+                    stageelement.SetAttribute("trackEndTime", careerEndBox.Value.ToString(CultureInfo.InvariantCulture));
+                    stageelement.SetAttribute("quickplayStartTime", quickStartBox.Value.ToString(CultureInfo.InvariantCulture));
+                    stageelement.SetAttribute("quickplayEndTime", quickEndBox.Value.ToString(CultureInfo.InvariantCulture));
                     trackconfig.AppendChild(stageelement);
                 }
             }
@@ -239,10 +240,10 @@ namespace GHLCP
                         ((XmlElement)stagefright).RemoveAttribute("parentSetlist");
                         ((XmlElement)stagefright).SetAttribute("parentSetlistDisabled", parentSetlistBox.Text);
                     }
-                    ((XmlElement)stagefright).SetAttribute("trackStartTime", careerStartBox.Value.ToString());
-                    ((XmlElement)stagefright).SetAttribute("trackEndTime", careerEndBox.Value.ToString());
-                    ((XmlElement)stagefright).SetAttribute("quickplayStartTime", quickStartBox.Value.ToString());
-                    ((XmlElement)stagefright).SetAttribute("quickplayEndTime", quickEndBox.Value.ToString());
+                    ((XmlElement)stagefright).SetAttribute("trackStartTime", careerStartBox.Value.ToString(CultureInfo.InvariantCulture));
+                    ((XmlElement)stagefright).SetAttribute("trackEndTime", careerEndBox.Value.ToString(CultureInfo.InvariantCulture));
+                    ((XmlElement)stagefright).SetAttribute("quickplayStartTime", quickStartBox.Value.ToString(CultureInfo.InvariantCulture));
+                    ((XmlElement)stagefright).SetAttribute("quickplayEndTime", quickEndBox.Value.ToString(CultureInfo.InvariantCulture));
                 }
             }
             
