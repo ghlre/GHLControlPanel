@@ -54,6 +54,7 @@ namespace GHLCP
                 {
                     installedListView.Items.Add(new ListViewItem(new string[] { track.GetAttributeNode("id").InnerText, track.GetAttributeNode("trackname").InnerText, track.GetAttributeNode("artist").InnerText, "0" }));
                 }
+                file.Close();
             }
             installedListView.Sorting = SortOrder.Ascending;
             installedListView.ListViewItemSorter = null;
@@ -70,20 +71,22 @@ namespace GHLCP
                 if (child.FirstChild.InnerText == "GHLive_Quickplay_AllTracks") {
                     foreach (XmlElement track in child.LastChild.ChildNodes)
                     {
-                        if (!File.Exists(gamedir + "\\Audio\\AudioTracks\\" + track.InnerText + "\\trackconfig.xml"))
+                        if (File.Exists(gamedir + "\\Audio\\AudioTracks\\" + track.InnerText + "\\trackconfig.xml")) 
                         {
-                            return;
-                        }
-                        XmlDocument document = new XmlDocument();
-                        document.Load(gamedir + "\\Audio\\AudioTracks\\" + track.InnerText + "\\trackconfig.xml");
-                        XmlElement trackconfig = document.DocumentElement;
-                        if (trackconfig.HasAttribute("intensity"))
+                            XmlDocument document = new XmlDocument();
+                            document.Load(gamedir + "\\Audio\\AudioTracks\\" + track.InnerText + "\\trackconfig.xml");
+                            XmlElement trackconfig = document.DocumentElement;
+                            if (trackconfig.HasAttribute("intensity"))
+                            {
+                                activeListView.Items.Add(new ListViewItem(new string[] { trackconfig.GetAttributeNode("id").InnerText, trackconfig.GetAttributeNode("trackname").InnerText, trackconfig.GetAttributeNode("artist").InnerText, trackconfig.GetAttributeNode("intensity").InnerText }));
+                            }
+                            else
+                            {
+                                activeListView.Items.Add(new ListViewItem(new string[] { trackconfig.GetAttributeNode("id").InnerText, trackconfig.GetAttributeNode("trackname").InnerText, trackconfig.GetAttributeNode("artist").InnerText, "0" }));
+                            }
+                        } else 
                         {
-                            activeListView.Items.Add(new ListViewItem(new string[] { trackconfig.GetAttributeNode("id").InnerText, trackconfig.GetAttributeNode("trackname").InnerText, trackconfig.GetAttributeNode("artist").InnerText, trackconfig.GetAttributeNode("intensity").InnerText }));
-                        }
-                        else
-                        {
-                            activeListView.Items.Add(new ListViewItem(new string[] { trackconfig.GetAttributeNode("id").InnerText, trackconfig.GetAttributeNode("trackname").InnerText, trackconfig.GetAttributeNode("artist").InnerText, "0" }));
+                            activeListView.Items.Add(new ListViewItem(new string[] { track.InnerText, "Track unavailable" }) { ForeColor = Color.Red });
                         }
                     }
                 }
@@ -288,31 +291,30 @@ namespace GHLCP
 
         private void installedListView_SelectedIndexChanged(object sender, EventArgs e)
         {
+            installedRemove.Enabled = false;
+            installedEdit.Enabled = false;
+
             if (installedListView.SelectedIndices.Count == 0)
             {
                 installedSetActive.Text = "Add To Quickplay";
                 installedSetActive.Enabled = false;
-                installedRemove.Enabled = false;
-                installedEdit.Enabled = false;
             } else
             {
                 installedSetActive.Enabled = true;
+
                 if (installedListView.SelectedIndices.Count == 1)
                 {
-                    installedRemove.Enabled = true;
                     installedEdit.Enabled = true;
-                } else
-                {
-                    installedRemove.Enabled = false;
-                    installedEdit.Enabled = false;
+                } 
+
+                foreach (ListViewItem selectedItem in installedListView.SelectedItems) {
+                    if (File.Exists(gamedir + "\\Audio\\AudioTracks\\" + selectedItem.SubItems[0].Text + "\\manifest.txt") && !defaultTracks.Contains(selectedItem.SubItems[0].Text))
+                    {
+                        installedRemove.Enabled = true;
+                        break;
+                    }
                 }
-                if (defaultTracks.Contains(installedListView.SelectedItems[0].SubItems[0].Text))
-                {
-                    installedRemove.Enabled = false;
-                } else if (!File.Exists(gamedir + "\\Audio\\AudioTracks\\"+ installedListView.SelectedItems[0].SubItems[0].Text+"\\manifest.txt"))
-                {
-                    installedRemove.Enabled = false;
-                }
+
                 installedSetActive.Text = "Add To Quickplay";
                 foreach (ListViewItem item in activeListView.Items)
                 {
@@ -359,8 +361,10 @@ namespace GHLCP
 
         private void activeRemove_Click(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in activeListView.SelectedItems)
+            foreach (ListViewItem item in activeListView.SelectedItems) 
+            {
                 item.Remove();
+            }
             trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
         }
 
@@ -518,22 +522,41 @@ namespace GHLCP
 
         private void installedRemove_Click(object sender, EventArgs e)
         {
-            if (!File.Exists(gamedir + "\\Audio\\AudioTracks\\" + installedListView.SelectedItems[0].SubItems[0].Text + "\\manifest.txt"))
-            {
-                MessageBox.Show("This song doesn't have a manifest and therefore can not be safely removed.");
-            }
-            string[] filesToRemove = File.ReadAllLines(gamedir + "\\Audio\\AudioTracks\\" + installedListView.SelectedItems[0].SubItems[0].Text + "\\manifest.txt");
-            foreach(string filepath in filesToRemove)
-            {
-                if (filepath.EndsWith("\\") || filepath == "")
-                {
+            string msg = "";
 
-                } else
+            foreach (ListViewItem item in installedListView.SelectedItems) 
+            {
+                if (File.Exists(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\manifest.txt"))
                 {
-                    File.Delete(gamedir + "\\" + filepath);
+                    if (defaultTracks.Contains(item.SubItems[0].Text)) 
+                    {
+                        msg += "ID " + item.SubItems[0].Text + ", " + item.SubItems[1].Text + " by " + item.SubItems[2].Text + " is a default track and therefore can not be safely removed.\n";
+                    } else {
+                        string[] filesToRemove = File.ReadAllLines(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\manifest.txt");
+                        foreach (string filepath in filesToRemove) 
+                        {
+                            if (filepath.EndsWith("\\") || filepath == "") 
+                            {
+
+                            } else 
+                            {
+                                File.Delete(gamedir + "\\" + filepath);
+                            }
+                        }
+                    }
+                } else 
+                {
+                    msg += "ID " + item.SubItems[0].Text + ", " + item.SubItems[1].Text + " by " + item.SubItems[2].Text + " doesn't have a manifest and therefore can not be safely removed.\n";
                 }
             }
+            
+            if (msg != "") 
+            {
+                MessageBox.Show(msg, "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
             PopulateInstalled();
+            PopulateActive();
             trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
         }
 
