@@ -159,6 +159,9 @@ namespace GHLCP
             GameFinderDialog.FileName = Properties.Settings.Default.pastFile;
             if (GameFinderDialog.ShowDialog() == DialogResult.OK)
             {
+                // Temporary variables
+                string platform, gamedir;
+
                 try
                 {
                     List<String> filenames = GameFinderDialog.FileName.Split('\\').ToList<String>();
@@ -172,6 +175,7 @@ namespace GHLCP
                             filenames.Remove(filename);
                             filenames.Remove("code");
                             filenames.Add("content");
+                            Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
                             gamedir = String.Join("\\", filenames);
                             break;
                         case "EBOOT.BIN":
@@ -194,57 +198,75 @@ namespace GHLCP
                             break;
                         default:
                             MessageBox.Show("That isn't a Guitar Hero Live executable!");
-                            Application.Exit();
-                            break;
+                            if (sender == this) 
+                            {
+                                Application.Exit();
+                            }
+                            return;
                     }
-
                 }
                 catch (SecurityException ex)
                 {
                     MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
                     $"Details:\n\n{ex.StackTrace}", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Application.Exit();
-                }
-            } else
-            {
-                Application.Exit();
-            }
-            if (!File.Exists(gamedir+ "\\Audio\\AudioTracks\\Setlists.xml"))
-            {
-                MessageBox.Show("This copy of the game is not extracted correctly (or is not GHL at all!). Please extract the game and try again.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                Application.Exit();
-                return;
-            }
-            if (File.Exists(gamedir + "\\FAR\\DiscOnly\\GameBoot.far"))
-            {
-                MessageBox.Show("\"gameboot.far\" exists in your GHL install directory. GHLCP will now remove this to enable custom tracks to appear in the quickplay menu.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                File.Delete(gamedir + "\\FAR\\DiscOnly\\GameBoot.far");
-                return;
-            }
-            Text = $"Guitar Hero Live Control Panel ({platform})";
-            PopulateInstalled();
-            PopulateActive();
-            ReadGameModifications();
-            string[] args = Environment.GetCommandLineArgs();
-            if (args.Length > 1)
-            {
-                bool skipfirst = true;
-                foreach (string arg in args)
-                {
-                    if (skipfirst)
+                    if (sender == this) 
                     {
-
-                    } else
-                    {
-                        HandleImport(arg);
+                        Application.Exit();
                     }
-                    skipfirst = false;
+                    return;
                 }
-            }
 
-            // hack to bring window to front.
-            this.TopMost = true;
-            this.TopMost = false;
+                if (!File.Exists(gamedir + "\\Audio\\AudioTracks\\Setlists.xml")) 
+                {
+                    MessageBox.Show("This copy of the game is not extracted correctly (or is not GHL at all!). Please extract the game and try again.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    if (sender == this) 
+                    {
+                        Application.Exit();
+                    }
+                    return;
+                }
+
+                if (File.Exists(gamedir + "\\FAR\\DiscOnly\\GameBoot.far")) 
+                {
+                    MessageBox.Show("\"gameboot.far\" exists in your GHL install directory. GHLCP will now remove this to enable custom tracks to appear in the quickplay menu.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    File.Delete(gamedir + "\\FAR\\DiscOnly\\GameBoot.far");
+                    return;
+                }
+
+                // Sets new values
+                Text = $"Guitar Hero Live Control Panel ({platform})";
+                this.platform = platform;
+                this.gamedir = gamedir;
+                launchInRPCS3ToolStripMenuItem.Enabled = platform == "PlayStation 3" && File.Exists(gamedir + "\\..\\..\\..\\..\\...\\rpcs3.exe");
+
+                PopulateInstalled();
+                PopulateActive();
+                ReadGameModifications();
+
+                string[] args = Environment.GetCommandLineArgs();
+                if (args.Length > 1) 
+                {
+                    bool skipfirst = true;
+                    foreach (string arg in args) 
+                    {
+                        if (skipfirst) 
+                        {
+
+                        } else 
+                        {
+                            HandleImport(arg);
+                        }
+                        skipfirst = false;
+                    }
+                }
+
+                // hack to bring window to front.
+                this.TopMost = true;
+                this.TopMost = false;
+            } else if (sender == this)
+            {
+                Application.Exit();
+            }
         }
 
         private void installedRefresh_Click(object sender, EventArgs e)
@@ -753,6 +775,14 @@ namespace GHLCP
                     File.WriteAllText(gamedir + "\\Audio\\AudioTracks\\" + item.SubItems[0].Text + "\\trackconfig.xml", document.OuterXml);
                 }
             }
+        }
+
+        private void launchInRPCS3ToolStripMenuItem_Click(object sender, EventArgs e) 
+        {
+            List<string> filenames = gamedir.Split('\\').ToList();
+            filenames.RemoveRange(filenames.Count - 5, 5);
+            string exe = string.Join("\\", filenames) + "\\rpcs3.exe";
+            Process.Start(exe, "--no-gui \"" + gamedir + "\\EBOOT.BIN\"");
         }
     }
     // Implements the manual sorting of items by columns.

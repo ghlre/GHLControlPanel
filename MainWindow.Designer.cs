@@ -52,6 +52,7 @@
             this.contextMenuStripActiveList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.removeFromQuickplayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.activeControls = new System.Windows.Forms.Panel();
+            this.trackCountLabel = new System.Windows.Forms.Label();
             this.exportCSVButton = new System.Windows.Forms.Button();
             this.activeRemove = new System.Windows.Forms.Button();
             this.activeRefresh = new System.Windows.Forms.Button();
@@ -88,6 +89,9 @@
             this.maximumMultiplierLabel = new System.Windows.Forms.Label();
             this.maximumMultiplier = new System.Windows.Forms.NumericUpDown();
             this.controlStrip = new System.Windows.Forms.MenuStrip();
+            this.gameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openGameFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.launchInRPCS3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.buildXMLItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveModsItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -105,7 +109,6 @@
             this.fuckYouActivision = new System.Windows.Forms.ToolStripMenuItem();
             this.ImportSongDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveCSVDialog = new System.Windows.Forms.SaveFileDialog();
-            this.trackCountLabel = new System.Windows.Forms.Label();
             this.songTabs.SuspendLayout();
             this.installedTracks.SuspendLayout();
             this.installedControls.SuspendLayout();
@@ -333,6 +336,15 @@
             this.activeControls.Name = "activeControls";
             this.activeControls.Size = new System.Drawing.Size(535, 29);
             this.activeControls.TabIndex = 3;
+            // 
+            // trackCountLabel
+            // 
+            this.trackCountLabel.AutoSize = true;
+            this.trackCountLabel.Location = new System.Drawing.Point(143, 8);
+            this.trackCountLabel.Name = "trackCountLabel";
+            this.trackCountLabel.Size = new System.Drawing.Size(71, 13);
+            this.trackCountLabel.TabIndex = 5;
+            this.trackCountLabel.Text = "Track count: ";
             // 
             // exportCSVButton
             // 
@@ -747,6 +759,7 @@
             // controlStrip
             // 
             this.controlStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.gameToolStripMenuItem,
             this.saveStrip,
             this.tracksStrip,
             this.aboutStrip});
@@ -755,6 +768,33 @@
             this.controlStrip.Size = new System.Drawing.Size(549, 24);
             this.controlStrip.TabIndex = 2;
             this.controlStrip.Text = "menuStrip1";
+            // 
+            // gameToolStripMenuItem
+            // 
+            this.gameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openGameFileToolStripMenuItem,
+            this.launchInRPCS3ToolStripMenuItem});
+            this.gameToolStripMenuItem.Name = "gameToolStripMenuItem";
+            this.gameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.gameToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
+            this.gameToolStripMenuItem.Text = "Game";
+            // 
+            // openGameFileToolStripMenuItem
+            // 
+            this.openGameFileToolStripMenuItem.Name = "openGameFileToolStripMenuItem";
+            this.openGameFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openGameFileToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.openGameFileToolStripMenuItem.Text = "Open Game Files ...";
+            this.openGameFileToolStripMenuItem.Click += new System.EventHandler(this.MainWindow_Load);
+            // 
+            // launchInRPCS3ToolStripMenuItem
+            // 
+            this.launchInRPCS3ToolStripMenuItem.Enabled = false;
+            this.launchInRPCS3ToolStripMenuItem.Name = "launchInRPCS3ToolStripMenuItem";
+            this.launchInRPCS3ToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.launchInRPCS3ToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.launchInRPCS3ToolStripMenuItem.Text = "Launch in RPCS3";
+            this.launchInRPCS3ToolStripMenuItem.Click += new System.EventHandler(this.launchInRPCS3ToolStripMenuItem_Click);
             // 
             // saveStrip
             // 
@@ -791,7 +831,7 @@
             this.disableAllVideosItem,
             this.enableCustomVIdeosToolStripMenuItem});
             this.tracksStrip.Name = "tracksStrip";
-            this.tracksStrip.Size = new System.Drawing.Size(51, 20);
+            this.tracksStrip.Size = new System.Drawing.Size(52, 20);
             this.tracksStrip.Text = "Tracks";
             // 
             // downloadTracksItem
@@ -849,25 +889,25 @@
             // 
             this.updatesItem.Enabled = false;
             this.updatesItem.Name = "updatesItem";
-            this.updatesItem.Size = new System.Drawing.Size(171, 22);
+            this.updatesItem.Size = new System.Drawing.Size(180, 22);
             this.updatesItem.Text = "Check for Updates";
             // 
             // aboutSeperator
             // 
             this.aboutSeperator.Name = "aboutSeperator";
-            this.aboutSeperator.Size = new System.Drawing.Size(168, 6);
+            this.aboutSeperator.Size = new System.Drawing.Size(177, 6);
             // 
             // aboutItem
             // 
             this.aboutItem.Name = "aboutItem";
-            this.aboutItem.Size = new System.Drawing.Size(171, 22);
+            this.aboutItem.Size = new System.Drawing.Size(180, 22);
             this.aboutItem.Text = "About GHLCP";
             this.aboutItem.Click += new System.EventHandler(this.aboutItem_Click);
             // 
             // fuckYouActivision
             // 
             this.fuckYouActivision.Name = "fuckYouActivision";
-            this.fuckYouActivision.Size = new System.Drawing.Size(171, 22);
+            this.fuckYouActivision.Size = new System.Drawing.Size(180, 22);
             this.fuckYouActivision.Text = "Annoy ATVIAssist";
             this.fuckYouActivision.Click += new System.EventHandler(this.fuckYouActivision_Click);
             // 
@@ -881,15 +921,6 @@
             this.saveCSVDialog.FileName = "songs";
             this.saveCSVDialog.Filter = "CSV file|*.csv|All files|*.*";
             this.saveCSVDialog.Title = "Export Songlist CSV";
-            // 
-            // trackCountLabel
-            // 
-            this.trackCountLabel.AutoSize = true;
-            this.trackCountLabel.Location = new System.Drawing.Point(143, 8);
-            this.trackCountLabel.Name = "trackCountLabel";
-            this.trackCountLabel.Size = new System.Drawing.Size(71, 13);
-            this.trackCountLabel.TabIndex = 5;
-            this.trackCountLabel.Text = "Track count: ";
             // 
             // MainWindow
             // 
@@ -1014,6 +1045,9 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStripActiveList;
         private System.Windows.Forms.ToolStripMenuItem removeFromQuickplayToolStripMenuItem;
         private System.Windows.Forms.Label trackCountLabel;
+        private System.Windows.Forms.ToolStripMenuItem gameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openGameFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem launchInRPCS3ToolStripMenuItem;
     }
 }
 
