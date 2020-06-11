@@ -58,7 +58,7 @@ namespace GHLCP
             Text = $"Editing Song: {trackconfig.GetAttributeNode("artist").InnerText} - {trackconfig.GetAttributeNode("trackname").InnerText} [{id}]";
             if (trackconfig.HasAttribute("unlockedInGHLiveByDefault"))
             {
-                unlockedInGHLBox.Checked = (trackconfig.GetAttributeNode("unlockedInGHLiveByDefault").InnerText == "true");
+                unlockedInGHLBox.Checked = (trackconfig.GetAttributeNode("unlockedInGHLiveByDefault").InnerText.ToLower() == "true");
             }
             if (trackconfig.HasAttribute("intensity"))
             {
@@ -75,7 +75,7 @@ namespace GHLCP
             {
                 if (((XmlElement)video).HasAttribute("hasVideo"))
                 {
-                    videoEnabledCheck.Checked = (((XmlElement)video).GetAttributeNode("hasVideo").InnerText == "true");
+                    videoEnabledCheck.Checked = (((XmlElement)video).GetAttributeNode("hasVideo").InnerText.ToLower() == "true");
                 }
                 if (((XmlElement)video).HasAttribute("musicStartTime"))
                 {
@@ -230,20 +230,58 @@ namespace GHLCP
             {
                 if (parentSetlistBox.Text != "")
                 {
+                    // Video files paths
+                    string source, dest;
+                    if (((XmlElement)stagefright).HasAttribute("parentSetlistDisabled"))
+                    {
+                        source = "Video/" + ((XmlElement)stagefright).GetAttribute("parentSetlistDisabled") + "/positive/";
+                    } else 
+                    {
+                        source = "setlists/" + ((XmlElement)stagefright).GetAttribute("parentSetlist") + "/video/positive/";
+                    }
+
                     if (enableStagefright.Checked)
                     {
                         ((XmlElement)stagefright).RemoveAttribute("parentSetlistDisabled");
                         ((XmlElement)stagefright).SetAttribute("parentSetlist", parentSetlistBox.Text);
+                        dest = "setlists/" + parentSetlistBox.Text + "/video/positive/";
                     }
                     else
                     {
                         ((XmlElement)stagefright).RemoveAttribute("parentSetlist");
                         ((XmlElement)stagefright).SetAttribute("parentSetlistDisabled", parentSetlistBox.Text);
+                        dest = "Video/" + parentSetlistBox.Text + "/positive/";
                     }
                     ((XmlElement)stagefright).SetAttribute("trackStartTime", careerStartBox.Value.ToString(CultureInfo.InvariantCulture));
                     ((XmlElement)stagefright).SetAttribute("trackEndTime", careerEndBox.Value.ToString(CultureInfo.InvariantCulture));
                     ((XmlElement)stagefright).SetAttribute("quickplayStartTime", quickStartBox.Value.ToString(CultureInfo.InvariantCulture));
                     ((XmlElement)stagefright).SetAttribute("quickplayEndTime", quickEndBox.Value.ToString(CultureInfo.InvariantCulture));
+
+                    if (source != dest && File.Exists(gamedire + "/" + source + "720_000000.mp4") && File.Exists(gamedire + "/" + source + "video.xml")) 
+                    {
+                        if (File.Exists(gamedire + "/" + dest + "720_000000.mp4") || File.Exists(gamedire + "/" + dest + "video.xml")) 
+                        {
+                            if (MessageBox.Show("This parent setlist already has a video. Do you wish to overwrite it?", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) 
+                            {
+                                if (File.Exists(gamedire + "/" + dest + "720_000000.mp4")) 
+                                {
+                                    File.Delete(gamedire + "/" + dest + "720_000000.mp4");
+                                }
+
+                                if (File.Exists(gamedire + "/" + dest + "video.xml")) 
+                                {
+                                    File.Delete(gamedire + "/" + dest + "video.xml");
+                                }
+
+                                MoveVideo(source, dest);
+                            }
+                        } 
+                        else 
+                        {
+                            Directory.CreateDirectory(gamedire + "/" + dest);
+                            MoveVideo(source, dest);
+                        }
+                    }
                 }
             }
             
@@ -254,6 +292,34 @@ namespace GHLCP
             File.WriteAllText(gamedire + "\\Audio\\AudioTracks\\" + idToGet + "\\trackconfig.xml", document.OuterXml);
 
             Close();
+        }
+
+        /// <summary>Moves the video files and updates the manifest.</summary>
+        /// <param name="source">Path of the video to move.</param>
+        /// <param name="dest">New path of the video.</param>
+        private void MoveVideo(string source, string dest) 
+        {
+            // Moves the video files
+            File.Move(gamedire + "/" + source + "720_000000.mp4", gamedire + "/" + dest + "720_000000.mp4");
+            File.Move(gamedire + "/" + source + "video.xml", gamedire + "/" + dest + "video.xml");
+
+            // Updates the manifest
+            if (File.Exists(gamedire + "/Audio/AudioTracks/" + idToGet + "/manifest.txt")) 
+            {
+                string[] manifest = File.ReadAllLines(gamedire + "/Audio/AudioTracks/" + idToGet + "/manifest.txt");
+                for (int i = 0; i < manifest.Length; i++) 
+                {
+                    if (manifest[i].Equals(source + "720_000000.mp4", StringComparison.OrdinalIgnoreCase)) 
+                    {
+                        manifest[i] = dest + "720_000000.mp4";
+                    } 
+                    else if (manifest[i].Equals(source + "video.xml", StringComparison.OrdinalIgnoreCase)) 
+                    {
+                        manifest[i] = dest + "video.xml";
+                    }
+                }
+                File.WriteAllLines(gamedire + "/Audio/AudioTracks/" + idToGet + "/manifest.txt", manifest);
+            }
         }
     }
 }
