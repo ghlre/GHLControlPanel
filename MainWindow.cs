@@ -237,7 +237,7 @@ namespace GHLCP
                 Text = $"Guitar Hero Live Control Panel ({platform})";
                 this.platform = platform;
                 this.gamedir = gamedir;
-                launchInRPCS3ToolStripMenuItem.Enabled = platform == "PlayStation 3" && File.Exists(gamedir + "\\..\\..\\..\\..\\...\\rpcs3.exe");
+                launchInRPCS3ToolStripMenuItem.Enabled = platform == "PlayStation 3";
 
                 PopulateInstalled();
                 PopulateActive();
@@ -779,10 +779,32 @@ namespace GHLCP
 
         private void launchInRPCS3ToolStripMenuItem_Click(object sender, EventArgs e) 
         {
-            List<string> filenames = gamedir.Split('\\').ToList();
-            filenames.RemoveRange(filenames.Count - 5, 5);
-            string exe = string.Join("\\", filenames) + "\\rpcs3.exe";
-            Process.Start(exe, "--no-gui \"" + gamedir + "\\EBOOT.BIN\"");
+            if (!File.Exists(Properties.Settings.Default.rpcs3Exe))
+            {
+                MessageBox.Show("Please select your RPCS3 executable.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                OpenFileDialog rpcs3ExeDialog = new OpenFileDialog
+                {
+                    Title = "Open RPCS3 executable",
+                    Filter = "RPCS3 executable|rpcs3.exe"
+                };
+
+                if (rpcs3ExeDialog.ShowDialog() == DialogResult.OK)
+                {
+                    Properties.Settings.Default.rpcs3Exe = rpcs3ExeDialog.FileName;
+                    Properties.Settings.Default.Save();
+                } else
+                {
+                    return;
+                }
+            }
+
+            Process.Start(
+                new ProcessStartInfo(Properties.Settings.Default.rpcs3Exe, $"\"{gamedir}/EBOOT.BIN\"")
+                {
+                    UseShellExecute = false,
+                    WorkingDirectory = Path.GetDirectoryName(Properties.Settings.Default.rpcs3Exe)
+                }
+            );
         }
     }
     // Implements the manual sorting of items by columns.

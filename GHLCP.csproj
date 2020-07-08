@@ -115,6 +115,7 @@
     <EmbeddedResource Include="WaitingForm.resx">
       <DependentUpon>WaitingForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include=".editorconfig" />
     <None Include=".gitignore" />
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
