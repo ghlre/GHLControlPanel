@@ -23,9 +23,6 @@ namespace GHLCP
         string version = "";
         string gamedir = "";
 
-        WaitingForm waitingform = new WaitingForm();
-
-
         string[] defaultTracks = { "GHL1003", "GHL1004", "GHL1005", "GHL1006", "GHL1007", "GHL1008", "GHL1009", "GHL1010", "GHL1011", "GHL1012", "GHL1013", "GHL1014", "GHL1015", "GHL1016", "GHL1017", "GHL1018", "GHL1019", "GHL1020", "GHL1021", "GHL1022", "GHL1023", "GHL1024", "GHL1025", "GHL1026", "GHL1027", "GHL1028", "GHL1029", "GHL1030", "GHL1031", "GHL1032", "GHL1033", "GHL1034", "GHL1035", "GHL1036", "GHL1037", "GHL1038", "GHL1039", "GHL1040", "GHL1041", "GHL1042", "GHL1043", "GHL1044", "GHL1045", "TST1798", "GHTVFree" };
 
         public MainWindow()
@@ -71,23 +68,7 @@ namespace GHLCP
                 if (child.FirstChild.InnerText == "GHLive_Quickplay_AllTracks") {
                     foreach (XmlElement track in child.LastChild.ChildNodes)
                     {
-                        if (File.Exists(gamedir + "\\Audio\\AudioTracks\\" + track.InnerText + "\\trackconfig.xml")) 
-                        {
-                            XmlDocument document = new XmlDocument();
-                            document.Load(gamedir + "\\Audio\\AudioTracks\\" + track.InnerText + "\\trackconfig.xml");
-                            XmlElement trackconfig = document.DocumentElement;
-                            if (trackconfig.HasAttribute("intensity"))
-                            {
-                                activeListView.Items.Add(new ListViewItem(new string[] { trackconfig.GetAttributeNode("id").InnerText, trackconfig.GetAttributeNode("trackname").InnerText, trackconfig.GetAttributeNode("artist").InnerText, trackconfig.GetAttributeNode("intensity").InnerText }));
-                            }
-                            else
-                            {
-                                activeListView.Items.Add(new ListViewItem(new string[] { trackconfig.GetAttributeNode("id").InnerText, trackconfig.GetAttributeNode("trackname").InnerText, trackconfig.GetAttributeNode("artist").InnerText, "0" }));
-                            }
-                        } else 
-                        {
-                            activeListView.Items.Add(new ListViewItem(new string[] { track.InnerText, "Track unavailable" }) { ForeColor = Color.Red });
-                        }
+                        activeListView.Items.Add(GetListViewItem(track.InnerText));
                     }
                 }
             }
@@ -155,117 +136,32 @@ namespace GHLCP
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
-            MessageBox.Show("Please select the executable of your Guitar Hero Live installation.\nSupported Consoles: Wii U, Xbox 360, PlayStation 3. iOS support is experimental!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            GameFinderDialog.FileName = Properties.Settings.Default.pastFile;
-            if (GameFinderDialog.ShowDialog() == DialogResult.OK)
+            if (File.Exists(Properties.Settings.Default.pastFile))
             {
-                // Temporary variables
-                string platform, gamedir;
+                OpenGameFiles(Properties.Settings.Default.pastFile);
+            }
 
-                try
-                {
-                    List<String> filenames = GameFinderDialog.FileName.Split('\\').ToList<String>();
-                    string filename = filenames[filenames.Count - 1];
-                    Properties.Settings.Default.pastFile = String.Join("\\", filenames);
-                    Properties.Settings.Default.Save();
-                    switch (filename)
-                    {
-                        case "GHLive.rpx":
-                            platform = "Wii U";
-                            filenames.Remove(filename);
-                            filenames.Remove("code");
-                            filenames.Add("content");
-                            Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
-                            gamedir = String.Join("\\", filenames);
-                            break;
-                        case "EBOOT.BIN":
-                            platform = "PlayStation 3";
-                            filenames.Remove(filename);
-                            Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
-                            gamedir = String.Join("\\", filenames);
-                            break;
-                        case "default.xex":
-                            platform = "Xbox 360";
-                            filenames.Remove(filename);
-                            Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
-                            gamedir = String.Join("\\", filenames);
-                            break;
-                        case "GHLive":
-                            platform = "iOS";
-                            filenames.Remove(filename);
-                            Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
-                            gamedir = String.Join("\\", filenames);
-                            break;
-                        default:
-                            MessageBox.Show("That isn't a Guitar Hero Live executable!");
-                            if (sender == this) 
-                            {
-                                Application.Exit();
-                            }
-                            return;
-                    }
-                }
-                catch (SecurityException ex)
-                {
-                    MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
-                    $"Details:\n\n{ex.StackTrace}", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    if (sender == this) 
-                    {
-                        Application.Exit();
-                    }
-                    return;
-                }
+            // If opening the past file failed or does not exist
+            if (String.IsNullOrEmpty(gamedir))
+            {
+                openGameFileToolStripMenuItem_Click(sender, e);
+            }
 
-                if (!File.Exists(gamedir + "\\Audio\\AudioTracks\\Setlists.xml")) 
-                {
-                    MessageBox.Show("This copy of the game is not extracted correctly (or is not GHL at all!). Please extract the game and try again.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    if (sender == this) 
-                    {
-                        Application.Exit();
-                    }
-                    return;
-                }
-
-                if (File.Exists(gamedir + "\\FAR\\DiscOnly\\GameBoot.far")) 
-                {
-                    MessageBox.Show("\"gameboot.far\" exists in your GHL install directory. GHLCP will now remove this to enable custom tracks to appear in the quickplay menu.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    File.Delete(gamedir + "\\FAR\\DiscOnly\\GameBoot.far");
-                    return;
-                }
-
-                // Sets new values
-                Text = $"Guitar Hero Live Control Panel ({platform})";
-                this.platform = platform;
-                this.gamedir = gamedir;
-                launchInRPCS3ToolStripMenuItem.Enabled = platform == "PlayStation 3";
-
-                PopulateInstalled();
-                PopulateActive();
-                ReadGameModifications();
-
-                string[] args = Environment.GetCommandLineArgs();
-                if (args.Length > 1) 
-                {
-                    bool skipfirst = true;
-                    foreach (string arg in args) 
-                    {
-                        if (skipfirst) 
-                        {
-
-                        } else 
-                        {
-                            HandleImport(arg);
-                        }
-                        skipfirst = false;
-                    }
-                }
-
-                // hack to bring window to front.
-                this.TopMost = true;
-                this.TopMost = false;
-            } else if (sender == this)
+            // If the selected file still fails
+            if (String.IsNullOrEmpty(gamedir))
             {
                 Application.Exit();
+            }
+            else
+            {
+                string[] args = Environment.GetCommandLineArgs();
+                if (args.Length > 1)
+                {
+                    foreach (string arg in args.Skip(1))
+                    {
+                        HandleImport(arg);
+                    }
+                }
             }
         }
 
@@ -488,14 +384,11 @@ namespace GHLCP
             using (ZipArchive archive = ZipFile.OpenRead(filename))
             {
                 string manifestfile = "";
-                string songID = "";
+                string songID = Path.GetPathRoot(archive.Entries[0].FullName);
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     List<string> pathElements = entry.FullName.Split('/').ToList();
-                    if (pathElements.Count == 2)
-                    {
-                        songID = pathElements[0];
-                    } else if (pathElements.Count >= 4)
+                    if (pathElements.Count >= 4)
                     {
                         string path = "";
                         string extractFor = pathElements[1].ToLower();
@@ -714,20 +607,6 @@ namespace GHLCP
             MessageBox.Show("Applied batch highway speeds!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void exportCSVButton_Click(object sender, EventArgs e)
-        {
-            string output = "Id,Artist,Title,Intensity";
-            foreach (ListViewItem item in activeListView.Items)
-            {
-                output += "\n";
-                output += item.SubItems[0].Text + "," + item.SubItems[2].Text + "," + item.SubItems[1].Text + "," + item.SubItems[3].Text;
-            }
-            if (saveCSVDialog.ShowDialog() == DialogResult.OK)
-            {
-                File.WriteAllText(saveCSVDialog.FileName, output);
-            }
-        }
-
         private void disableVideosItem_Click(object sender, EventArgs e)
         {
             DialogResult dialog = MessageBox.Show("This will disable all background videos on stock songs in order to resolve issues on truncated copies of the game. Are you sure you want to continue?", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
@@ -805,6 +684,172 @@ namespace GHLCP
                     WorkingDirectory = Path.GetDirectoryName(Properties.Settings.Default.rpcs3Exe)
                 }
             );
+        }
+
+        private void importCSVToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openCsvDialog = new OpenFileDialog
+            {
+                Title = "Import Songlist CSV",
+                Filter = "CSV file|*.csv"
+            };
+
+            if (openCsvDialog.ShowDialog() == DialogResult.OK)
+            {
+                activeListView.Items.Clear();
+
+                // Skips .csv header
+                foreach (string track in File.ReadAllLines(openCsvDialog.FileName).Skip(1))
+                {
+                    activeListView.Items.Add(GetListViewItem(track.Split(',')[0]));
+                }
+
+                trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
+            }
+        }
+
+        private void exportCSVToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string output = "Id,Artist,Title,Intensity";
+            foreach (ListViewItem item in activeListView.Items)
+            {
+                output += "\n";
+                output += item.SubItems[0].Text + "," + item.SubItems[2].Text + "," + item.SubItems[1].Text + "," + item.SubItems[3].Text;
+            }
+            if (saveCSVDialog.ShowDialog() == DialogResult.OK)
+            {
+                File.WriteAllText(saveCSVDialog.FileName, output);
+            }
+        }
+
+        private void randomizeSonglistToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            List<int> pool = new List<int>(Enumerable.Range(0, installedListView.Items.Count));
+            Random random = new Random();
+            int i;
+
+            activeListView.Items.Clear();
+
+            while (activeListView.Items.Count < 50 && pool.Count > 0)
+            {
+                i = random.Next(pool.Count);
+                activeListView.Items.Add((ListViewItem)installedListView.Items[pool[i]].Clone());
+                pool.RemoveAt(i);
+            }
+
+            trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
+        }
+
+        /// <summary>Opens the selected game files.</summary>
+        /// <param name="path">Path to the executable of the Guitar Hero Live installation.</param>
+        private void OpenGameFiles(string path)
+        {
+            // Temporary variables
+            string platform, gamedir;
+
+            try
+            {
+                List<String> filenames = path.Split('\\').ToList<String>();
+                string filename = filenames[filenames.Count - 1];
+
+                switch (filename)
+                {
+                    case "GHLive.rpx":
+                        platform = "Wii U";
+                        filenames.Remove(filename);
+                        filenames.Remove("code");
+                        filenames.Add("content");
+                        Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
+                        gamedir = String.Join("\\", filenames);
+                        break;
+                    case "EBOOT.BIN":
+                        platform = "PlayStation 3";
+                        filenames.Remove(filename);
+                        Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
+                        gamedir = String.Join("\\", filenames);
+                        break;
+                    case "default.xex":
+                        platform = "Xbox 360";
+                        filenames.Remove(filename);
+                        Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
+                        gamedir = String.Join("\\", filenames);
+                        break;
+                    case "GHLive":
+                        platform = "iOS";
+                        filenames.Remove(filename);
+                        Properties.Settings.Default.initialDirectory = String.Join("\\", filenames);
+                        gamedir = String.Join("\\", filenames);
+                        break;
+                    default:
+                        MessageBox.Show("That isn't a Guitar Hero Live executable!");
+                        return;
+                }
+            }
+            catch (SecurityException ex)
+            {
+                MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
+                $"Details:\n\n{ex.StackTrace}", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!File.Exists(gamedir + "\\Audio\\AudioTracks\\Setlists.xml"))
+            {
+                MessageBox.Show("This copy of the game is not extracted correctly (or is not GHL at all!). Please extract the game and try again.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            if (File.Exists(gamedir + "\\FAR\\DiscOnly\\GameBoot.far"))
+            {
+                MessageBox.Show("\"gameboot.far\" exists in your GHL install directory. GHLCP will now remove this to enable custom tracks to appear in the quickplay menu.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                File.Delete(gamedir + "\\FAR\\DiscOnly\\GameBoot.far");
+                return;
+            }
+
+            // Sets new values
+            Text = $"Guitar Hero Live Control Panel ({platform})";
+            this.platform = platform;
+            this.gamedir = gamedir;
+            launchInRPCS3ToolStripMenuItem.Enabled = platform == "PlayStation 3";
+
+            Properties.Settings.Default.pastFile = path;
+            Properties.Settings.Default.Save();
+
+            PopulateInstalled();
+            PopulateActive();
+            ReadGameModifications();
+        }
+
+        /// <summary>Gets a <see cref="ListViewItem"/> with the trackconfig information of the selected id.</summary>
+        /// <param name="id">Id of the selected song.</param>
+        /// <returns>Returns a <see cref="ListViewItem"/> with the trackconfig information of the selected id.
+        /// Returns a <see cref="ListViewItem"/> indicating an error if the selected id doesn't have a trackconfig file.</returns>
+        private ListViewItem GetListViewItem(string id)
+        {
+            if (File.Exists(gamedir + "\\Audio\\AudioTracks\\" + id + "\\trackconfig.xml"))
+            {
+                XmlDocument document = new XmlDocument();
+                document.Load(gamedir + "\\Audio\\AudioTracks\\" + id + "\\trackconfig.xml");
+                XmlElement trackconfig = document.DocumentElement;
+                return new ListViewItem(new string[] { trackconfig.GetAttributeNode("id").InnerText, trackconfig.GetAttributeNode("trackname").InnerText, trackconfig.GetAttributeNode("artist").InnerText, trackconfig.HasAttribute("intensity") ? trackconfig.GetAttributeNode("intensity").InnerText : "0" });
+            }
+            else
+            {
+                return new ListViewItem(new string[] { id, "Track unavailable" }) { ForeColor = Color.Red };
+            }
+        }
+
+        private void openGameFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Please select the executable of your Guitar Hero Live installation.\nSupported Consoles: Wii U, Xbox 360, PlayStation 3. iOS support is experimental!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            GameFinderDialog.FileName = Properties.Settings.Default.pastFile;
+            if (GameFinderDialog.ShowDialog() == DialogResult.OK)
+            {
+                OpenGameFiles(GameFinderDialog.FileName);
+
+                // hack to bring window to front.
+                this.TopMost = true;
+                this.TopMost = false;
+            }
         }
     }
     // Implements the manual sorting of items by columns.
