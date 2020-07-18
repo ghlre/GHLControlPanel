@@ -363,23 +363,14 @@ namespace GHLCP
         {
             if (ImportSongDialog.ShowDialog() == DialogResult.OK)
             {
-                try
-                {
-                    foreach (string file in ImportSongDialog.FileNames)
-                    {
-                        HandleImport(file);
-                    }
-                }
-                catch (Exception)
-                {
-                    MessageBox.Show("There was an unknown error that occurred while importing one or more of your songs.");
-                }
+
+                new WaitingForm(this, ImportSongDialog.FileNames).ShowDialog();
+                PopulateInstalled();
+                PopulateActive();
             }
-            PopulateInstalled();
-            PopulateActive();
         }
 
-        private void HandleImport(string filename)
+        public void HandleImport(string filename)
         {
             using (ZipArchive archive = ZipFile.OpenRead(filename))
             {
