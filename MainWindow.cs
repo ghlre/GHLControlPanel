@@ -385,15 +385,13 @@ namespace GHLCP
                         pathElements.RemoveRange(0, 2);
                         string path = platform == "PlayStation 3" ? string.Join("/", pathElements).ToUpper() : string.Join("/", pathElements);
 
-                        bool shouldExtract = false;
-                        if (extractFor == "master" && platform != "iOS") shouldExtract = true;
-                        if (extractFor == "360" && platform == "Xbox 360") shouldExtract = true;
-                        if (extractFor == "ios" && platform == "iOS") shouldExtract = true;
-                        if (extractFor == "ps4" && platform == "PlayStation 4") shouldExtract = true;
-                        if (extractFor == "others" && (platform == "PlayStation 4" || platform == "iOS")) shouldExtract = true;
-                        if (extractFor == "ps3" && platform == "PlayStation 3") shouldExtract = true;
-
-                        if (shouldExtract)
+                        if ((extractFor == "master" && platform != "iOS") ||
+                        (extractFor == "360" && platform == "Xbox 360") ||
+                        (extractFor == "ios" && platform == "iOS") ||
+                        (extractFor == "ps4" && platform == "PlayStation 4") ||
+                        (extractFor == "others" && (platform == "PlayStation 4" || platform == "iOS")) ||
+                        (extractFor == "ps3" && platform == "PlayStation 3") ||
+                        (extractFor == "wiiu" && platform == "Wii U"))
                         {
                             if (!entry.FullName.EndsWith("/"))
                             {
