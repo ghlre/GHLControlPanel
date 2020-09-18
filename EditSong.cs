@@ -17,6 +17,7 @@ namespace GHLCP
         private readonly MainWindow mainWindow;
         private readonly string id;
         bool dontAlertChanges = false;
+        private XmlDocument document;
 
         public EditSong(MainWindow mainWindow, string id)
         {
@@ -125,8 +126,7 @@ namespace GHLCP
             if (((XmlElement)highway).HasAttribute("highwayTransparency"))
             {
                 transparencyBox.Value = Convert.ToDecimal(((XmlElement)highway).GetAttributeNode("highwayTransparency").InnerText, CultureInfo.InvariantCulture);
-            }
-            else
+            } else
             {
                 transparencyBox.Enabled = false;
             }
@@ -167,8 +167,7 @@ namespace GHLCP
 
         private void saveTrack_Click(object sender, EventArgs e)
         {
-            XmlDocument document = new XmlDocument();
-            document.Load(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml");
+            LoadXml();
 
             // Track generic details
             XmlElement trackconfig = document.DocumentElement;
@@ -192,19 +191,19 @@ namespace GHLCP
             {
                 ((XmlElement)highway).SetAttribute("highwayTransparency", transparencyBox.Value.ToString(CultureInfo.InvariantCulture));
             }
-            
+
             // Video shit
             XmlNode video = document.SelectSingleNode("Track/Video");
             if (video == null)
             {
-                if (videoEnabledCheck.Checked) {
+                if (videoEnabledCheck.Checked)
+                {
                     XmlElement videoelement = document.CreateElement("Video");
                     videoelement.SetAttribute("hasVideo", boolToXml(videoEnabledCheck.Checked));
                     videoelement.SetAttribute("musicStartTime", videoStartBox.Value.ToString(CultureInfo.InvariantCulture));
                     trackconfig.AppendChild(videoelement);
                 }
-            }
-            else
+            } else
             {
                 ((XmlElement)video).SetAttribute("hasVideo", boolToXml(videoEnabledCheck.Checked));
                 ((XmlElement)video).SetAttribute("musicStartTime", videoStartBox.Value.ToString(CultureInfo.InvariantCulture));
@@ -212,114 +211,124 @@ namespace GHLCP
 
             // Stagefright shit
             XmlNode stagefright = document.SelectSingleNode("Track/Stagefright");
-            if (stagefright == null)
+            if (stagefright == null && enableStagefright.Checked)
             {
-                if (enableStagefright.Checked)
-                {
-                    XmlElement stageelement = document.CreateElement("Stagefright");
-                    stageelement.SetAttribute("parentSetlist", parentSetlistBox.Text);
-                    stageelement.SetAttribute("trackStartTime", careerStartBox.Value.ToString(CultureInfo.InvariantCulture));
-                    stageelement.SetAttribute("trackEndTime", careerEndBox.Value.ToString(CultureInfo.InvariantCulture));
-                    stageelement.SetAttribute("quickplayStartTime", quickStartBox.Value.ToString(CultureInfo.InvariantCulture));
-                    stageelement.SetAttribute("quickplayEndTime", quickEndBox.Value.ToString(CultureInfo.InvariantCulture));
-                    trackconfig.AppendChild(stageelement);
-                }
-            }
-            else
+                XmlElement stageelement = document.CreateElement("Stagefright");
+                stageelement.SetAttribute("parentSetlist", parentSetlistBox.Text);
+                stageelement.SetAttribute("trackStartTime", careerStartBox.Value.ToString(CultureInfo.InvariantCulture));
+                stageelement.SetAttribute("trackEndTime", careerEndBox.Value.ToString(CultureInfo.InvariantCulture));
+                stageelement.SetAttribute("quickplayStartTime", quickStartBox.Value.ToString(CultureInfo.InvariantCulture));
+                stageelement.SetAttribute("quickplayEndTime", quickEndBox.Value.ToString(CultureInfo.InvariantCulture));
+                document.DocumentElement.AppendChild(stageelement);
+            } else
             {
-                if (parentSetlistBox.Text != "")
-                {
-                    // Video files paths
-                    string source, dest;
-                    if (((XmlElement)stagefright).HasAttribute("parentSetlistDisabled"))
-                    {
-                        source = "Video/" + ((XmlElement)stagefright).GetAttribute("parentSetlistDisabled") + "/positive/";
-                    } else 
-                    {
-                        source = "setlists/" + ((XmlElement)stagefright).GetAttribute("parentSetlist") + "/video/positive/";
-                    }
-
-                    if (enableStagefright.Checked)
-                    {
-                        ((XmlElement)stagefright).RemoveAttribute("parentSetlistDisabled");
-                        ((XmlElement)stagefright).SetAttribute("parentSetlist", parentSetlistBox.Text);
-                        dest = "setlists/" + parentSetlistBox.Text + "/video/positive/";
-                    }
-                    else
-                    {
-                        ((XmlElement)stagefright).RemoveAttribute("parentSetlist");
-                        ((XmlElement)stagefright).SetAttribute("parentSetlistDisabled", parentSetlistBox.Text);
-                        dest = "Video/" + parentSetlistBox.Text + "/positive/";
-                    }
-
-                    if (mainWindow.platform == "PlayStation 3")
-                    {
-                        dest = dest.ToUpper();
-                    }
-
-                    ((XmlElement)stagefright).SetAttribute("trackStartTime", careerStartBox.Value.ToString(CultureInfo.InvariantCulture));
-                    ((XmlElement)stagefright).SetAttribute("trackEndTime", careerEndBox.Value.ToString(CultureInfo.InvariantCulture));
-                    ((XmlElement)stagefright).SetAttribute("quickplayStartTime", quickStartBox.Value.ToString(CultureInfo.InvariantCulture));
-                    ((XmlElement)stagefright).SetAttribute("quickplayEndTime", quickEndBox.Value.ToString(CultureInfo.InvariantCulture));
-
-                    if (!source.Equals(dest, StringComparison.OrdinalIgnoreCase) && File.Exists(mainWindow.gamedir + "/" + source + "720_000000.mp4") && File.Exists(mainWindow.gamedir + "/" + source + "video.xml")) 
-                    {
-                        if (File.Exists(mainWindow.gamedir + "/" + dest + "720_000000.mp4") || File.Exists(mainWindow.gamedir + "/" + dest + "video.xml")) 
-                        {
-                            if (MessageBox.Show("This parent setlist already has a video. Do you wish to overwrite it?", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) 
-                            {
-                                if (File.Exists(mainWindow.gamedir + "/" + dest + "720_000000.mp4")) 
-                                {
-                                    File.Delete(mainWindow.gamedir + "/" + dest + "720_000000.mp4");
-                                }
-
-                                if (File.Exists(mainWindow.gamedir + "/" + dest + "video.xml")) 
-                                {
-                                    File.Delete(mainWindow.gamedir + "/" + dest + "video.xml");
-                                }
-
-                                MoveVideo(source, dest);
-                            }
-                        } 
-                        else 
-                        {
-                            Directory.CreateDirectory(mainWindow.gamedir + "/" + dest);
-                            MoveVideo(source, dest);
-                        }
-                    }
-                }
+                ((XmlElement)stagefright).SetAttribute("trackStartTime", careerStartBox.Value.ToString(CultureInfo.InvariantCulture));
+                ((XmlElement)stagefright).SetAttribute("trackEndTime", careerEndBox.Value.ToString(CultureInfo.InvariantCulture));
+                ((XmlElement)stagefright).SetAttribute("quickplayStartTime", quickStartBox.Value.ToString(CultureInfo.InvariantCulture));
+                ((XmlElement)stagefright).SetAttribute("quickplayEndTime", quickEndBox.Value.ToString(CultureInfo.InvariantCulture));
             }
-            
-            if (!File.Exists(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml.bak"))
-            {
-                File.Copy(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml", mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml.bak", true);
-            }
-            File.WriteAllText(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml", document.OuterXml);
+
+            EnableParentSetlist(enableStagefright.Checked, parentSetlistBox.Text);
+
+            SaveXml();
 
             DialogResult = DialogResult.Yes;
             Close();
         }
 
+        /// <summary>Load trackconfig.xml</summary>
+        public void LoadXml()
+        {
+            document = new XmlDocument();
+            document.Load(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml");
+        }
+
+        /// <summary>Enable or disable the parent setlist</summary>
+        /// <param name="enable">Enable parent setlist if true, disable if false</param>
+        /// <param name="parentSetlist">Name of the new parentSetlist</param>
+        public void EnableParentSetlist(bool enable, string parentSetlist)
+        {
+            if (!String.IsNullOrEmpty(parentSetlist))
+            {
+                XmlNode stagefright = document.SelectSingleNode("Track/Stagefright");
+
+                // Video files paths
+                string source = ((XmlElement)stagefright).HasAttribute("parentSetlistDisabled") ? "Video/" + ((XmlElement)stagefright).GetAttribute("parentSetlistDisabled") + "/positive/" : "setlists/" + ((XmlElement)stagefright).GetAttribute("parentSetlist") + "/video/positive/";
+
+                string dest;
+                if (enable)
+                {
+                    ((XmlElement)stagefright).RemoveAttribute("parentSetlistDisabled");
+                    ((XmlElement)stagefright).SetAttribute("parentSetlist", parentSetlist);
+                    dest = "setlists/" + parentSetlist + "/video/positive/";
+                } else
+                {
+                    ((XmlElement)stagefright).RemoveAttribute("parentSetlist");
+                    ((XmlElement)stagefright).SetAttribute("parentSetlistDisabled", parentSetlist);
+                    dest = "Video/" + parentSetlist + "/positive/";
+                }
+
+                if (mainWindow.platform == "PlayStation 3")
+                {
+                    dest = dest.ToUpper();
+                }
+
+                if (!source.Equals(dest, StringComparison.OrdinalIgnoreCase) && File.Exists(mainWindow.gamedir + "/" + source + "720_000000.mp4") && File.Exists(mainWindow.gamedir + "/" + source + "video.xml"))
+                {
+                    if (File.Exists(mainWindow.gamedir + "/" + dest + "720_000000.mp4") || File.Exists(mainWindow.gamedir + "/" + dest + "video.xml"))
+                    {
+                        if (!Visible || MessageBox.Show("This parent setlist already has a video. Do you wish to overwrite it?", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            if (File.Exists(mainWindow.gamedir + "/" + dest + "720_000000.mp4"))
+                            {
+                                File.Delete(mainWindow.gamedir + "/" + dest + "720_000000.mp4");
+                            }
+
+                            if (File.Exists(mainWindow.gamedir + "/" + dest + "video.xml"))
+                            {
+                                File.Delete(mainWindow.gamedir + "/" + dest + "video.xml");
+                            }
+
+                            MoveVideo(source, dest);
+                        }
+                    } else
+                    {
+                        Directory.CreateDirectory(mainWindow.gamedir + "/" + dest);
+                        MoveVideo(source, dest);
+                    }
+                }
+            }
+        }
+
+        /// <summary>Save trackconfig.xml</summary>
+        public void SaveXml()
+        {
+            if (!File.Exists(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml.bak"))
+            {
+                File.Copy(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml", mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml.bak", true);
+            }
+            File.WriteAllText(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml", document.OuterXml);
+        }
+
         /// <summary>Moves the video files and updates the manifest.</summary>
         /// <param name="source">Path of the video to move.</param>
         /// <param name="dest">New path of the video.</param>
-        private void MoveVideo(string source, string dest) 
+        private void MoveVideo(string source, string dest)
         {
             // Moves the video files
             File.Move(mainWindow.gamedir + "/" + source + "720_000000.mp4", mainWindow.gamedir + "/" + dest + (mainWindow.platform == "PlayStation 3" ? "720_000000.MP4" : "720_000000.mp4"));
             File.Move(mainWindow.gamedir + "/" + source + "video.xml", mainWindow.gamedir + "/" + dest + (mainWindow.platform == "PlayStation 3" ? "VIDEO.XML" : "video.xml"));
 
             // Updates the manifest
-            if (File.Exists(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/manifest.txt")) 
+            if (File.Exists(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/manifest.txt"))
             {
                 string[] manifest = File.ReadAllLines(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/manifest.txt");
-                for (int i = 0; i < manifest.Length; i++) 
+                for (int i = 0; i < manifest.Length; i++)
                 {
-                    if (manifest[i].Equals(source + "720_000000.mp4", StringComparison.OrdinalIgnoreCase)) 
+                    if (manifest[i].Equals(source + "720_000000.mp4", StringComparison.OrdinalIgnoreCase))
                     {
                         manifest[i] = dest + "720_000000.mp4";
-                    } 
-                    else if (manifest[i].Equals(source + "video.xml", StringComparison.OrdinalIgnoreCase)) 
+                    } else if (manifest[i].Equals(source + "video.xml", StringComparison.OrdinalIgnoreCase))
                     {
                         manifest[i] = dest + "video.xml";
                     }

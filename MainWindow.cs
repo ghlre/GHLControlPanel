@@ -654,6 +654,19 @@ namespace GHLCP
             }
         }
 
+        private void enableCustomParentSetlistsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to enable custom parent setlists? This may cause some crashes.", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                EnableCustomParentSetlists(true);
+            }
+        }
+
+        private void disableCustomParentSetlistsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            EnableCustomParentSetlists(false);
+        }
+
         private void launchInRPCS3ToolStripMenuItem_Click(object sender, EventArgs e) 
         {
             if (!File.Exists(Properties.Settings.Default.rpcs3Exe))
@@ -847,6 +860,22 @@ namespace GHLCP
                 // hack to bring window to front.
                 this.TopMost = true;
                 this.TopMost = false;
+            }
+        }
+
+        /// <summary>Enable or disable the parent setlists of all the installed custom songs</summary>
+        /// <param name="enable">Enable parent setlists if true, disable if false</param>
+        private void EnableCustomParentSetlists(bool enable)
+        {
+            foreach (ListViewItem item in installedListView.Items)
+            {
+                if (!defaultTracks.Contains(item.SubItems[0].Text))
+                {
+                    EditSong edit = new EditSong(this, item.SubItems[0].Text);
+                    edit.LoadXml();
+                    edit.EnableParentSetlist(enable, item.SubItems[0].Text);
+                    edit.SaveXml();
+                }
             }
         }
     }
