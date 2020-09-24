@@ -57,6 +57,7 @@
             this.activeRefresh = new System.Windows.Forms.Button();
             this.activeEdit = new System.Windows.Forms.Button();
             this.gameHacks = new System.Windows.Forms.TabPage();
+            this.uppercaseFix = new System.Windows.Forms.CheckBox();
             this.noteStreakFix = new System.Windows.Forms.CheckBox();
             this.batchHyperspeed = new System.Windows.Forms.GroupBox();
             this.speedXBox = new System.Windows.Forms.NumericUpDown();
@@ -90,6 +91,8 @@
             this.controlStrip = new System.Windows.Forms.MenuStrip();
             this.gameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openGameFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.openInFileExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.launchInRPCS3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.buildXMLItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -389,6 +392,7 @@
             // gameHacks
             // 
             this.gameHacks.AutoScroll = true;
+            this.gameHacks.Controls.Add(this.uppercaseFix);
             this.gameHacks.Controls.Add(this.noteStreakFix);
             this.gameHacks.Controls.Add(this.batchHyperspeed);
             this.gameHacks.Controls.Add(this.gameStartupConfig);
@@ -406,6 +410,17 @@
             this.gameHacks.TabIndex = 2;
             this.gameHacks.Text = "Game Modifications";
             this.gameHacks.UseVisualStyleBackColor = true;
+            // 
+            // uppercaseFix
+            // 
+            this.uppercaseFix.AutoSize = true;
+            this.uppercaseFix.Enabled = false;
+            this.uppercaseFix.Location = new System.Drawing.Point(243, 123);
+            this.uppercaseFix.Name = "uppercaseFix";
+            this.uppercaseFix.Size = new System.Drawing.Size(146, 17);
+            this.uppercaseFix.TabIndex = 11;
+            this.uppercaseFix.Text = "Apply PS3 Uppercase Fix";
+            this.uppercaseFix.UseVisualStyleBackColor = true;
             // 
             // noteStreakFix
             // 
@@ -770,6 +785,8 @@
             // 
             this.gameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openGameFileToolStripMenuItem,
+            this.toolStripSeparator4,
+            this.openInFileExplorerToolStripMenuItem,
             this.launchInRPCS3ToolStripMenuItem});
             this.gameToolStripMenuItem.Name = "gameToolStripMenuItem";
             this.gameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
@@ -783,6 +800,18 @@
             this.openGameFileToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
             this.openGameFileToolStripMenuItem.Text = "Open Game Files ...";
             this.openGameFileToolStripMenuItem.Click += new System.EventHandler(this.openGameFileToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(215, 6);
+            // 
+            // openInFileExplorerToolStripMenuItem
+            // 
+            this.openInFileExplorerToolStripMenuItem.Name = "openInFileExplorerToolStripMenuItem";
+            this.openInFileExplorerToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.openInFileExplorerToolStripMenuItem.Text = "Open in File Explorer";
+            this.openInFileExplorerToolStripMenuItem.Click += new System.EventHandler(this.openInFileExplorerToolStripMenuItem_Click);
             // 
             // launchInRPCS3ToolStripMenuItem
             // 
@@ -1112,6 +1141,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem enableCustomParentSetlistsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem disableCustomParentSetlistsToolStripMenuItem;
+        private System.Windows.Forms.CheckBox uppercaseFix;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem openInFileExplorerToolStripMenuItem;
     }
 }
 

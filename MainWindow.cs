@@ -549,6 +549,12 @@ namespace GHLCP
 
             File.Copy(gamedir + "/UI/GameUI.xml", gamedir + "/UI/GameUI.xml.bak", true);
             File.WriteAllText(gamedir + "/UI/GameUI.xml", gameui.OuterXml);
+
+            if (uppercaseFix.Checked)
+            {
+                UppercaseDir(gamedir);
+            }
+
             MessageBox.Show("Saved modified game files!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -820,7 +826,7 @@ namespace GHLCP
             Text = $"Guitar Hero Live Control Panel ({platform})";
             this.platform = platform;
             this.gamedir = gamedir;
-            launchInRPCS3ToolStripMenuItem.Enabled = platform == "PlayStation 3";
+            launchInRPCS3ToolStripMenuItem.Enabled = uppercaseFix.Enabled = platform == "PlayStation 3";
 
             Properties.Settings.Default.pastFile = path;
             Properties.Settings.Default.Save();
@@ -877,6 +883,33 @@ namespace GHLCP
                     edit.SaveXml();
                 }
             }
+        }
+
+        /// <summary>Recursively apply uppercase to each file and directory from the root directory</summary>
+        /// <param name="root">Root directory to apply uppercase to</param>
+        public static void UppercaseDir(string root)
+        {
+            foreach (string file in Directory.GetFiles(root))
+            {
+                File.Move(file, file.ToUpper());
+            }
+
+            foreach (string dir in Directory.GetDirectories(root))
+            {
+                Directory.Move(dir, dir + "temp"); // Move to a temporary directory to avoid IOException
+                Directory.Move(dir + "temp", dir.ToUpper());
+                foreach (string file in Directory.GetFiles(dir.ToUpper()))
+                {
+                    File.Move(file, file.ToUpper());
+                }
+
+                UppercaseDir(dir.ToUpper());
+            }
+        }
+
+        private void openInFileExplorerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start(@gamedir);
         }
     }
     // Implements the manual sorting of items by columns.
