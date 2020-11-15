@@ -57,7 +57,6 @@
             this.activeRefresh = new System.Windows.Forms.Button();
             this.activeEdit = new System.Windows.Forms.Button();
             this.gameHacks = new System.Windows.Forms.TabPage();
-            this.uppercaseFix = new System.Windows.Forms.CheckBox();
             this.noteStreakFix = new System.Windows.Forms.CheckBox();
             this.batchHyperspeed = new System.Windows.Forms.GroupBox();
             this.speedXBox = new System.Windows.Forms.NumericUpDown();
@@ -119,6 +118,7 @@
             this.fuckYouActivision = new System.Windows.Forms.ToolStripMenuItem();
             this.ImportSongDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveCSVDialog = new System.Windows.Forms.SaveFileDialog();
+            this.uppercaseFix = new System.Windows.Forms.Button();
             this.songTabs.SuspendLayout();
             this.installedTracks.SuspendLayout();
             this.installedControls.SuspendLayout();
@@ -410,17 +410,6 @@
             this.gameHacks.TabIndex = 2;
             this.gameHacks.Text = "Game Modifications";
             this.gameHacks.UseVisualStyleBackColor = true;
-            // 
-            // uppercaseFix
-            // 
-            this.uppercaseFix.AutoSize = true;
-            this.uppercaseFix.Enabled = false;
-            this.uppercaseFix.Location = new System.Drawing.Point(243, 123);
-            this.uppercaseFix.Name = "uppercaseFix";
-            this.uppercaseFix.Size = new System.Drawing.Size(146, 17);
-            this.uppercaseFix.TabIndex = 11;
-            this.uppercaseFix.Text = "Apply PS3 Uppercase Fix";
-            this.uppercaseFix.UseVisualStyleBackColor = true;
             // 
             // noteStreakFix
             // 
@@ -835,7 +824,7 @@
             // 
             this.buildXMLItem.Name = "buildXMLItem";
             this.buildXMLItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.B)));
-            this.buildXMLItem.Size = new System.Drawing.Size(246, 22);
+            this.buildXMLItem.Size = new System.Drawing.Size(245, 22);
             this.buildXMLItem.Text = "Build Setlists/Tracklisting";
             this.buildXMLItem.Click += new System.EventHandler(this.buildXMLItem_Click);
             // 
@@ -843,7 +832,7 @@
             // 
             this.saveModsItem.Name = "saveModsItem";
             this.saveModsItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveModsItem.Size = new System.Drawing.Size(246, 22);
+            this.saveModsItem.Size = new System.Drawing.Size(245, 22);
             this.saveModsItem.Text = "Save Modifications";
             this.saveModsItem.Click += new System.EventHandler(this.saveModsItem_Click);
             // 
@@ -860,7 +849,7 @@
             this.enableCustomParentSetlistsToolStripMenuItem,
             this.disableCustomParentSetlistsToolStripMenuItem});
             this.tracksStrip.Name = "tracksStrip";
-            this.tracksStrip.Size = new System.Drawing.Size(52, 20);
+            this.tracksStrip.Size = new System.Drawing.Size(51, 20);
             this.tracksStrip.Text = "Tracks";
             // 
             // downloadTracksItem
@@ -1008,6 +997,16 @@
             this.saveCSVDialog.Filter = "CSV file|*.csv|All files|*.*";
             this.saveCSVDialog.Title = "Export Songlist CSV";
             // 
+            // uppercaseFix
+            // 
+            this.uppercaseFix.Location = new System.Drawing.Point(243, 124);
+            this.uppercaseFix.Name = "uppercaseFix";
+            this.uppercaseFix.Size = new System.Drawing.Size(280, 23);
+            this.uppercaseFix.TabIndex = 11;
+            this.uppercaseFix.Text = "Apply PS3 Uppercase Fix";
+            this.uppercaseFix.UseVisualStyleBackColor = true;
+            this.uppercaseFix.Click += new System.EventHandler(this.uppercaseFix_Click);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1141,9 +1140,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem enableCustomParentSetlistsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem disableCustomParentSetlistsToolStripMenuItem;
-        private System.Windows.Forms.CheckBox uppercaseFix;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem openInFileExplorerToolStripMenuItem;
+        private System.Windows.Forms.Button uppercaseFix;
     }
 }
 

@@ -59,7 +59,7 @@ namespace GHLCP
                 statusLabel.ForeColor = Color.Red;
             } else if (e.Error != null)
             {
-                statusLabel.Text = "An unknown error occurred while importing one or more of your songs";
+                statusLabel.Text = e.Error is ArgumentException ? e.Error.Message : "An unknown error occurred while importing one or more of your songs";
                 statusLabel.ForeColor = Color.Red;
             } else
             {

@@ -270,23 +270,19 @@ namespace GHLCP
 
                 if (mainWindow.platform == "PlayStation 3")
                 {
+                    source = source.ToUpper();
                     dest = dest.ToUpper();
                 }
 
-                if (!source.Equals(dest, StringComparison.OrdinalIgnoreCase) && File.Exists(mainWindow.gamedir + "/" + source + "720_000000.mp4") && File.Exists(mainWindow.gamedir + "/" + source + "video.xml"))
+                if (!source.Equals(dest, StringComparison.OrdinalIgnoreCase) && File.Exists(mainWindow.gamedir + "/" + source + "video.xml"))
                 {
-                    if (File.Exists(mainWindow.gamedir + "/" + dest + "720_000000.mp4") || File.Exists(mainWindow.gamedir + "/" + dest + "video.xml"))
+                    if (File.Exists(mainWindow.gamedir + "/" + dest + "video.xml"))
                     {
                         if (!Visible || MessageBox.Show("This parent setlist already has a video. Do you wish to overwrite it?", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
-                            if (File.Exists(mainWindow.gamedir + "/" + dest + "720_000000.mp4"))
+                            foreach (string file in Directory.GetFiles(mainWindow.gamedir + "/" + dest))
                             {
-                                File.Delete(mainWindow.gamedir + "/" + dest + "720_000000.mp4");
-                            }
-
-                            if (File.Exists(mainWindow.gamedir + "/" + dest + "video.xml"))
-                            {
-                                File.Delete(mainWindow.gamedir + "/" + dest + "video.xml");
+                                File.Delete(file);
                             }
 
                             MoveVideo(source, dest);
@@ -315,26 +311,16 @@ namespace GHLCP
         /// <param name="dest">New path of the video.</param>
         private void MoveVideo(string source, string dest)
         {
-            // Moves the video files
-            File.Move(mainWindow.gamedir + "/" + source + "720_000000.mp4", mainWindow.gamedir + "/" + dest + (mainWindow.platform == "PlayStation 3" ? "720_000000.MP4" : "720_000000.mp4"));
-            File.Move(mainWindow.gamedir + "/" + source + "video.xml", mainWindow.gamedir + "/" + dest + (mainWindow.platform == "PlayStation 3" ? "VIDEO.XML" : "video.xml"));
+            HashSet<string> manifest = new HashSet<string>(File.ReadAllLines(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/manifest.txt"));
 
-            // Updates the manifest
-            if (File.Exists(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/manifest.txt"))
+            foreach (string file in Directory.GetFiles(mainWindow.gamedir + "/" + source))
             {
-                string[] manifest = File.ReadAllLines(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/manifest.txt");
-                for (int i = 0; i < manifest.Length; i++)
-                {
-                    if (manifest[i].Equals(source + "720_000000.mp4", StringComparison.OrdinalIgnoreCase))
-                    {
-                        manifest[i] = dest + "720_000000.mp4";
-                    } else if (manifest[i].Equals(source + "video.xml", StringComparison.OrdinalIgnoreCase))
-                    {
-                        manifest[i] = dest + "video.xml";
-                    }
-                }
-                File.WriteAllLines(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/manifest.txt", manifest);
+                manifest.Remove(source + Path.GetFileName(file));
+                File.Move(file, mainWindow.gamedir + "/" + dest + Path.GetFileName(file));
+                manifest.Add(dest + Path.GetFileName(file));
             }
+
+            File.WriteAllLines(mainWindow.gamedir + "/Audio/AudioTracks/" + id + "/manifest.txt", manifest.ToArray());
         }
     }
 }

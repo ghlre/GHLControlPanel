@@ -374,8 +374,9 @@ namespace GHLCP
         {
             using (ZipArchive archive = ZipFile.OpenRead(filename))
             {
-                string manifestfile = "";
                 string songID = archive.Entries[0].FullName.Split('/')[0];
+                string manifestFile = gamedir + "/Audio/AudioTracks/" + songID + "/manifest.txt";
+                HashSet<string> manifest = File.Exists(manifestFile) ? new HashSet<string>(File.ReadAllLines(manifestFile)) : new HashSet<string>();
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     List<string> pathElements = entry.FullName.Split('/').ToList();
@@ -395,7 +396,7 @@ namespace GHLCP
                         {
                             if (!entry.FullName.EndsWith("/"))
                             {
-                                manifestfile += path + "\n";
+                                manifest.Add(path);
                                 pathElements.RemoveAt(pathElements.Count - 1);
                                 string folderPath = platform == "PlayStation 3" ? string.Join("/", pathElements).ToUpper() : string.Join("/", pathElements);
                                 if (!Directory.Exists(gamedir + "/" + folderPath))
@@ -409,13 +410,29 @@ namespace GHLCP
                         }
                     }
                 }
-                File.WriteAllText(gamedir + "/Audio/AudioTracks/" + songID + "/manifest.txt", manifestfile);
+
+                File.WriteAllLines(manifestFile, manifest.ToArray());
+
                 if (platform == "iOS")
                 {
                     XmlDocument document = new XmlDocument();
                     document.Load(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml");
                     XmlNode video = document.SelectSingleNode("Track/Video");
                     ((XmlElement)video).SetAttribute("hasVideo", "false");
+                    File.WriteAllText(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml", document.OuterXml);
+                }
+
+                // Sets the video to true when importing video
+                if (manifest.Where(file => file.ToLower().EndsWith("video.xml")).Count() > 0)
+                {
+                    if (!File.Exists(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml"))
+                    {
+                        throw new ArgumentException("Trackconfig not found. Please import the track data before the video");
+                    }
+                    XmlDocument document = new XmlDocument();
+                    document.Load(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml");
+                    XmlNode video = document.SelectSingleNode("Track/Video");
+                    ((XmlElement)video).SetAttribute("hasVideo", "true");
                     File.WriteAllText(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml", document.OuterXml);
                 }
             }
@@ -442,9 +459,14 @@ namespace GHLCP
 
                             } else 
                             {
-                                File.Delete(gamedir + "/" + filepath);
+                                try
+                                {
+                                    File.Delete(gamedir + "/" + filepath);
+                                } catch (Exception) { }
+                                
                             }
                         }
+                        File.Delete(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/manifest.txt");
                     }
                 } else 
                 {
@@ -549,11 +571,6 @@ namespace GHLCP
 
             File.Copy(gamedir + "/UI/GameUI.xml", gamedir + "/UI/GameUI.xml.bak", true);
             File.WriteAllText(gamedir + "/UI/GameUI.xml", gameui.OuterXml);
-
-            if (uppercaseFix.Checked)
-            {
-                UppercaseDir(gamedir);
-            }
 
             MessageBox.Show("Saved modified game files!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -910,6 +927,11 @@ namespace GHLCP
         private void openInFileExplorerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Process.Start(@gamedir);
+        }
+
+        private void uppercaseFix_Click(object sender, EventArgs e)
+        {
+            UppercaseDir(gamedir);
         }
     }
     // Implements the manual sorting of items by columns.
