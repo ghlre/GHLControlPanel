@@ -52,7 +52,7 @@
             this.contextMenuStripActiveList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.removeFromQuickplayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.activeControls = new System.Windows.Forms.Panel();
-            this.exportCSVButton = new System.Windows.Forms.Button();
+            this.trackCountLabel = new System.Windows.Forms.Label();
             this.activeRemove = new System.Windows.Forms.Button();
             this.activeRefresh = new System.Windows.Forms.Button();
             this.activeEdit = new System.Windows.Forms.Button();
@@ -88,6 +88,11 @@
             this.maximumMultiplierLabel = new System.Windows.Forms.Label();
             this.maximumMultiplier = new System.Windows.Forms.NumericUpDown();
             this.controlStrip = new System.Windows.Forms.MenuStrip();
+            this.gameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openGameFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.openInFileExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.launchInRPCS3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.buildXMLItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveModsItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -98,6 +103,14 @@
             this.disableVideosItem = new System.Windows.Forms.ToolStripMenuItem();
             this.disableAllVideosItem = new System.Windows.Forms.ToolStripMenuItem();
             this.enableCustomVIdeosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.enableCustomParentSetlistsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.disableCustomParentSetlistsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.songlistToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importCSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportCSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.randomizeSonglistToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.updatesItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutSeperator = new System.Windows.Forms.ToolStripSeparator();
@@ -105,7 +118,7 @@
             this.fuckYouActivision = new System.Windows.Forms.ToolStripMenuItem();
             this.ImportSongDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveCSVDialog = new System.Windows.Forms.SaveFileDialog();
-            this.trackCountLabel = new System.Windows.Forms.Label();
+            this.uppercaseFix = new System.Windows.Forms.Button();
             this.songTabs.SuspendLayout();
             this.installedTracks.SuspendLayout();
             this.installedControls.SuspendLayout();
@@ -324,7 +337,6 @@
             // activeControls
             // 
             this.activeControls.Controls.Add(this.trackCountLabel);
-            this.activeControls.Controls.Add(this.exportCSVButton);
             this.activeControls.Controls.Add(this.activeRemove);
             this.activeControls.Controls.Add(this.activeRefresh);
             this.activeControls.Controls.Add(this.activeEdit);
@@ -334,15 +346,14 @@
             this.activeControls.Size = new System.Drawing.Size(535, 29);
             this.activeControls.TabIndex = 3;
             // 
-            // exportCSVButton
+            // trackCountLabel
             // 
-            this.exportCSVButton.Location = new System.Drawing.Point(62, 3);
-            this.exportCSVButton.Name = "exportCSVButton";
-            this.exportCSVButton.Size = new System.Drawing.Size(75, 23);
-            this.exportCSVButton.TabIndex = 4;
-            this.exportCSVButton.Text = "Export CSV";
-            this.exportCSVButton.UseVisualStyleBackColor = true;
-            this.exportCSVButton.Click += new System.EventHandler(this.exportCSVButton_Click);
+            this.trackCountLabel.AutoSize = true;
+            this.trackCountLabel.Location = new System.Drawing.Point(62, 8);
+            this.trackCountLabel.Name = "trackCountLabel";
+            this.trackCountLabel.Size = new System.Drawing.Size(71, 13);
+            this.trackCountLabel.TabIndex = 5;
+            this.trackCountLabel.Text = "Track count: ";
             // 
             // activeRemove
             // 
@@ -381,6 +392,7 @@
             // gameHacks
             // 
             this.gameHacks.AutoScroll = true;
+            this.gameHacks.Controls.Add(this.uppercaseFix);
             this.gameHacks.Controls.Add(this.noteStreakFix);
             this.gameHacks.Controls.Add(this.batchHyperspeed);
             this.gameHacks.Controls.Add(this.gameStartupConfig);
@@ -747,14 +759,57 @@
             // controlStrip
             // 
             this.controlStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.gameToolStripMenuItem,
             this.saveStrip,
             this.tracksStrip,
+            this.songlistToolStripMenuItem,
             this.aboutStrip});
             this.controlStrip.Location = new System.Drawing.Point(0, 0);
             this.controlStrip.Name = "controlStrip";
             this.controlStrip.Size = new System.Drawing.Size(549, 24);
             this.controlStrip.TabIndex = 2;
             this.controlStrip.Text = "menuStrip1";
+            // 
+            // gameToolStripMenuItem
+            // 
+            this.gameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openGameFileToolStripMenuItem,
+            this.toolStripSeparator4,
+            this.openInFileExplorerToolStripMenuItem,
+            this.launchInRPCS3ToolStripMenuItem});
+            this.gameToolStripMenuItem.Name = "gameToolStripMenuItem";
+            this.gameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.gameToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
+            this.gameToolStripMenuItem.Text = "Game";
+            // 
+            // openGameFileToolStripMenuItem
+            // 
+            this.openGameFileToolStripMenuItem.Name = "openGameFileToolStripMenuItem";
+            this.openGameFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openGameFileToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.openGameFileToolStripMenuItem.Text = "Open Game Files ...";
+            this.openGameFileToolStripMenuItem.Click += new System.EventHandler(this.openGameFileToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(215, 6);
+            // 
+            // openInFileExplorerToolStripMenuItem
+            // 
+            this.openInFileExplorerToolStripMenuItem.Name = "openInFileExplorerToolStripMenuItem";
+            this.openInFileExplorerToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.openInFileExplorerToolStripMenuItem.Text = "Open in File Explorer";
+            this.openInFileExplorerToolStripMenuItem.Click += new System.EventHandler(this.openInFileExplorerToolStripMenuItem_Click);
+            // 
+            // launchInRPCS3ToolStripMenuItem
+            // 
+            this.launchInRPCS3ToolStripMenuItem.Enabled = false;
+            this.launchInRPCS3ToolStripMenuItem.Name = "launchInRPCS3ToolStripMenuItem";
+            this.launchInRPCS3ToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.launchInRPCS3ToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.launchInRPCS3ToolStripMenuItem.Text = "Launch in RPCS3";
+            this.launchInRPCS3ToolStripMenuItem.Click += new System.EventHandler(this.launchInRPCS3ToolStripMenuItem_Click);
             // 
             // saveStrip
             // 
@@ -769,7 +824,7 @@
             // 
             this.buildXMLItem.Name = "buildXMLItem";
             this.buildXMLItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.B)));
-            this.buildXMLItem.Size = new System.Drawing.Size(246, 22);
+            this.buildXMLItem.Size = new System.Drawing.Size(245, 22);
             this.buildXMLItem.Text = "Build Setlists/Tracklisting";
             this.buildXMLItem.Click += new System.EventHandler(this.buildXMLItem_Click);
             // 
@@ -777,7 +832,7 @@
             // 
             this.saveModsItem.Name = "saveModsItem";
             this.saveModsItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveModsItem.Size = new System.Drawing.Size(246, 22);
+            this.saveModsItem.Size = new System.Drawing.Size(245, 22);
             this.saveModsItem.Text = "Save Modifications";
             this.saveModsItem.Click += new System.EventHandler(this.saveModsItem_Click);
             // 
@@ -789,7 +844,10 @@
             this.toolStripSeparator1,
             this.disableVideosItem,
             this.disableAllVideosItem,
-            this.enableCustomVIdeosToolStripMenuItem});
+            this.enableCustomVIdeosToolStripMenuItem,
+            this.toolStripSeparator3,
+            this.enableCustomParentSetlistsToolStripMenuItem,
+            this.disableCustomParentSetlistsToolStripMenuItem});
             this.tracksStrip.Name = "tracksStrip";
             this.tracksStrip.Size = new System.Drawing.Size(51, 20);
             this.tracksStrip.Text = "Tracks";
@@ -798,41 +856,98 @@
             // 
             this.downloadTracksItem.Enabled = false;
             this.downloadTracksItem.Name = "downloadTracksItem";
-            this.downloadTracksItem.Size = new System.Drawing.Size(192, 22);
+            this.downloadTracksItem.Size = new System.Drawing.Size(233, 22);
             this.downloadTracksItem.Text = "Download Tracks";
             // 
             // importTracksItem
             // 
             this.importTracksItem.Name = "importTracksItem";
-            this.importTracksItem.Size = new System.Drawing.Size(192, 22);
+            this.importTracksItem.Size = new System.Drawing.Size(233, 22);
             this.importTracksItem.Text = "Import Tracks";
             this.importTracksItem.Click += new System.EventHandler(this.importTracksItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(189, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(230, 6);
             // 
             // disableVideosItem
             // 
             this.disableVideosItem.Name = "disableVideosItem";
-            this.disableVideosItem.Size = new System.Drawing.Size(192, 22);
+            this.disableVideosItem.Size = new System.Drawing.Size(233, 22);
             this.disableVideosItem.Text = "Disable Stock Videos";
             this.disableVideosItem.Click += new System.EventHandler(this.disableVideosItem_Click);
             // 
             // disableAllVideosItem
             // 
             this.disableAllVideosItem.Name = "disableAllVideosItem";
-            this.disableAllVideosItem.Size = new System.Drawing.Size(192, 22);
+            this.disableAllVideosItem.Size = new System.Drawing.Size(233, 22);
             this.disableAllVideosItem.Text = "Disable All Videos";
             this.disableAllVideosItem.Click += new System.EventHandler(this.disableAllVideosItem_Click);
             // 
             // enableCustomVIdeosToolStripMenuItem
             // 
             this.enableCustomVIdeosToolStripMenuItem.Name = "enableCustomVIdeosToolStripMenuItem";
-            this.enableCustomVIdeosToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.enableCustomVIdeosToolStripMenuItem.Size = new System.Drawing.Size(233, 22);
             this.enableCustomVIdeosToolStripMenuItem.Text = "Enable Custom Videos";
             this.enableCustomVIdeosToolStripMenuItem.Click += new System.EventHandler(this.enableCustomVIdeosToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(230, 6);
+            // 
+            // enableCustomParentSetlistsToolStripMenuItem
+            // 
+            this.enableCustomParentSetlistsToolStripMenuItem.Name = "enableCustomParentSetlistsToolStripMenuItem";
+            this.enableCustomParentSetlistsToolStripMenuItem.Size = new System.Drawing.Size(233, 22);
+            this.enableCustomParentSetlistsToolStripMenuItem.Text = "Enable Custom Parent Setlists";
+            this.enableCustomParentSetlistsToolStripMenuItem.Click += new System.EventHandler(this.enableCustomParentSetlistsToolStripMenuItem_Click);
+            // 
+            // disableCustomParentSetlistsToolStripMenuItem
+            // 
+            this.disableCustomParentSetlistsToolStripMenuItem.Name = "disableCustomParentSetlistsToolStripMenuItem";
+            this.disableCustomParentSetlistsToolStripMenuItem.Size = new System.Drawing.Size(233, 22);
+            this.disableCustomParentSetlistsToolStripMenuItem.Text = "Disable Custom Parent Setlists";
+            this.disableCustomParentSetlistsToolStripMenuItem.Click += new System.EventHandler(this.disableCustomParentSetlistsToolStripMenuItem_Click);
+            // 
+            // songlistToolStripMenuItem
+            // 
+            this.songlistToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.importCSVToolStripMenuItem,
+            this.exportCSVToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.randomizeSonglistToolStripMenuItem});
+            this.songlistToolStripMenuItem.Name = "songlistToolStripMenuItem";
+            this.songlistToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.songlistToolStripMenuItem.Text = "Songlist";
+            // 
+            // importCSVToolStripMenuItem
+            // 
+            this.importCSVToolStripMenuItem.Name = "importCSVToolStripMenuItem";
+            this.importCSVToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.importCSVToolStripMenuItem.Text = "Import Songlist CSV";
+            this.importCSVToolStripMenuItem.Click += new System.EventHandler(this.importCSVToolStripMenuItem_Click);
+            // 
+            // exportCSVToolStripMenuItem
+            // 
+            this.exportCSVToolStripMenuItem.Name = "exportCSVToolStripMenuItem";
+            this.exportCSVToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.exportCSVToolStripMenuItem.Text = "Export Songlist CSV";
+            this.exportCSVToolStripMenuItem.Click += new System.EventHandler(this.exportCSVToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(176, 6);
+            // 
+            // randomizeSonglistToolStripMenuItem
+            // 
+            this.randomizeSonglistToolStripMenuItem.Name = "randomizeSonglistToolStripMenuItem";
+            this.randomizeSonglistToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            this.randomizeSonglistToolStripMenuItem.Text = "Randomize Songlist";
+            this.randomizeSonglistToolStripMenuItem.ToolTipText = "Randomize up to 50 songs";
+            this.randomizeSonglistToolStripMenuItem.Click += new System.EventHandler(this.randomizeSonglistToolStripMenuItem_Click);
             // 
             // aboutStrip
             // 
@@ -882,14 +997,15 @@
             this.saveCSVDialog.Filter = "CSV file|*.csv|All files|*.*";
             this.saveCSVDialog.Title = "Export Songlist CSV";
             // 
-            // trackCountLabel
+            // uppercaseFix
             // 
-            this.trackCountLabel.AutoSize = true;
-            this.trackCountLabel.Location = new System.Drawing.Point(143, 8);
-            this.trackCountLabel.Name = "trackCountLabel";
-            this.trackCountLabel.Size = new System.Drawing.Size(71, 13);
-            this.trackCountLabel.TabIndex = 5;
-            this.trackCountLabel.Text = "Track count: ";
+            this.uppercaseFix.Location = new System.Drawing.Point(243, 124);
+            this.uppercaseFix.Name = "uppercaseFix";
+            this.uppercaseFix.Size = new System.Drawing.Size(280, 23);
+            this.uppercaseFix.TabIndex = 11;
+            this.uppercaseFix.Text = "Apply PS3 Uppercase Fix";
+            this.uppercaseFix.UseVisualStyleBackColor = true;
+            this.uppercaseFix.Click += new System.EventHandler(this.uppercaseFix_Click);
             // 
             // MainWindow
             // 
@@ -1004,7 +1120,6 @@
         private System.Windows.Forms.Label spelabel;
         private System.Windows.Forms.NumericUpDown speedBBox;
         private System.Windows.Forms.Label spblabel;
-        private System.Windows.Forms.Button exportCSVButton;
         private System.Windows.Forms.SaveFileDialog saveCSVDialog;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem disableVideosItem;
@@ -1014,6 +1129,20 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStripActiveList;
         private System.Windows.Forms.ToolStripMenuItem removeFromQuickplayToolStripMenuItem;
         private System.Windows.Forms.Label trackCountLabel;
+        private System.Windows.Forms.ToolStripMenuItem gameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openGameFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem launchInRPCS3ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem songlistToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importCSVToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportCSVToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem randomizeSonglistToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem enableCustomParentSetlistsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem disableCustomParentSetlistsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem openInFileExplorerToolStripMenuItem;
+        private System.Windows.Forms.Button uppercaseFix;
     }
 }
 

@@ -55,7 +55,7 @@
             this.ghlCpVersion.Name = "ghlCpVersion";
             this.ghlCpVersion.Size = new System.Drawing.Size(91, 15);
             this.ghlCpVersion.TabIndex = 2;
-            this.ghlCpVersion.Text = "version 0.2-beta";
+            this.ghlCpVersion.Text = "version 0.3.1-beta";
             // 
             // dby
             // 
@@ -71,9 +71,9 @@
             this.developedByLabel.AutoSize = true;
             this.developedByLabel.Location = new System.Drawing.Point(336, 85);
             this.developedByLabel.Name = "developedByLabel";
-            this.developedByLabel.Size = new System.Drawing.Size(88, 13);
+            this.developedByLabel.Size = new System.Drawing.Size(88, 26);
             this.developedByLabel.TabIndex = 4;
-            this.developedByLabel.Text = "InvoxiPlayGames";
+            this.developedByLabel.Text = "InvoxiPlayGames\r\nAnthoChamb";
             // 
             // pleaseContribute
             // 
