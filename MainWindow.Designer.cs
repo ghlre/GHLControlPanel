@@ -57,6 +57,7 @@
             this.activeRefresh = new System.Windows.Forms.Button();
             this.activeEdit = new System.Windows.Forms.Button();
             this.gameHacks = new System.Windows.Forms.TabPage();
+            this.uppercaseFix = new System.Windows.Forms.Button();
             this.noteStreakFix = new System.Windows.Forms.CheckBox();
             this.batchHyperspeed = new System.Windows.Forms.GroupBox();
             this.speedXBox = new System.Windows.Forms.NumericUpDown();
@@ -88,11 +89,13 @@
             this.maximumMultiplierLabel = new System.Windows.Forms.Label();
             this.maximumMultiplier = new System.Windows.Forms.NumericUpDown();
             this.controlStrip = new System.Windows.Forms.MenuStrip();
-            this.gameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openGameFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.openInFileExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.launchInRPCS3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.buildXMLItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveModsItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -118,7 +121,7 @@
             this.fuckYouActivision = new System.Windows.Forms.ToolStripMenuItem();
             this.ImportSongDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveCSVDialog = new System.Windows.Forms.SaveFileDialog();
-            this.uppercaseFix = new System.Windows.Forms.Button();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.songTabs.SuspendLayout();
             this.installedTracks.SuspendLayout();
             this.installedControls.SuspendLayout();
@@ -410,6 +413,16 @@
             this.gameHacks.TabIndex = 2;
             this.gameHacks.Text = "Game Modifications";
             this.gameHacks.UseVisualStyleBackColor = true;
+            // 
+            // uppercaseFix
+            // 
+            this.uppercaseFix.Location = new System.Drawing.Point(243, 124);
+            this.uppercaseFix.Name = "uppercaseFix";
+            this.uppercaseFix.Size = new System.Drawing.Size(280, 23);
+            this.uppercaseFix.TabIndex = 11;
+            this.uppercaseFix.Text = "Apply PS3 Uppercase Fix";
+            this.uppercaseFix.UseVisualStyleBackColor = true;
+            this.uppercaseFix.Click += new System.EventHandler(this.uppercaseFix_Click);
             // 
             // noteStreakFix
             // 
@@ -759,7 +772,7 @@
             // controlStrip
             // 
             this.controlStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.gameToolStripMenuItem,
+            this.fileToolStripMenuItem,
             this.saveStrip,
             this.tracksStrip,
             this.songlistToolStripMenuItem,
@@ -770,17 +783,20 @@
             this.controlStrip.TabIndex = 2;
             this.controlStrip.Text = "menuStrip1";
             // 
-            // gameToolStripMenuItem
+            // fileToolStripMenuItem
             // 
-            this.gameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openGameFileToolStripMenuItem,
             this.toolStripSeparator4,
             this.openInFileExplorerToolStripMenuItem,
-            this.launchInRPCS3ToolStripMenuItem});
-            this.gameToolStripMenuItem.Name = "gameToolStripMenuItem";
-            this.gameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.gameToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
-            this.gameToolStripMenuItem.Text = "Game";
+            this.launchInRPCS3ToolStripMenuItem,
+            this.toolStripSeparator5,
+            this.settingsToolStripMenuItem,
+            this.exitToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Text = "File";
             // 
             // openGameFileToolStripMenuItem
             // 
@@ -810,6 +826,21 @@
             this.launchInRPCS3ToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
             this.launchInRPCS3ToolStripMenuItem.Text = "Launch in RPCS3";
             this.launchInRPCS3ToolStripMenuItem.Click += new System.EventHandler(this.launchInRPCS3ToolStripMenuItem_Click);
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.settingsToolStripMenuItem.Text = "Settings";
+            this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // saveStrip
             // 
@@ -997,15 +1028,10 @@
             this.saveCSVDialog.Filter = "CSV file|*.csv|All files|*.*";
             this.saveCSVDialog.Title = "Export Songlist CSV";
             // 
-            // uppercaseFix
+            // toolStripSeparator5
             // 
-            this.uppercaseFix.Location = new System.Drawing.Point(243, 124);
-            this.uppercaseFix.Name = "uppercaseFix";
-            this.uppercaseFix.Size = new System.Drawing.Size(280, 23);
-            this.uppercaseFix.TabIndex = 11;
-            this.uppercaseFix.Text = "Apply PS3 Uppercase Fix";
-            this.uppercaseFix.UseVisualStyleBackColor = true;
-            this.uppercaseFix.Click += new System.EventHandler(this.uppercaseFix_Click);
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(215, 6);
             // 
             // MainWindow
             // 
@@ -1129,7 +1155,7 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStripActiveList;
         private System.Windows.Forms.ToolStripMenuItem removeFromQuickplayToolStripMenuItem;
         private System.Windows.Forms.Label trackCountLabel;
-        private System.Windows.Forms.ToolStripMenuItem gameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openGameFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem launchInRPCS3ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem songlistToolStripMenuItem;
@@ -1143,6 +1169,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem openInFileExplorerToolStripMenuItem;
         private System.Windows.Forms.Button uppercaseFix;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
     }
 }
 

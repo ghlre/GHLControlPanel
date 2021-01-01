@@ -65,7 +65,8 @@ namespace GHLCP
             doc.Load(gamedir + "/Audio/AudioTracks/Setlists.xml");
             foreach (XmlElement child in doc.SelectNodes("Classes/Class"))
             {
-                if (child.FirstChild.InnerText == "GHLive_Quickplay_AllTracks") {
+                if (child.FirstChild.InnerText == "GHLive_Quickplay_AllTracks") 
+                {
                     foreach (XmlElement track in child.LastChild.ChildNodes)
                     {
                         activeListView.Items.Add(GetListViewItem(track.InnerText));
@@ -423,7 +424,7 @@ namespace GHLCP
                 }
 
                 // Sets the video to true when importing video
-                if (manifest.Where(file => file.ToLower().EndsWith("video.xml")).Count() > 0)
+                if (Properties.Settings.Default.importVideo && manifest.Where(file => file.ToLower().EndsWith("video.xml")).Count() > 0)
                 {
                     if (!File.Exists(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml"))
                     {
@@ -434,6 +435,11 @@ namespace GHLCP
                     XmlNode video = document.SelectSingleNode("Track/Video");
                     ((XmlElement)video).SetAttribute("hasVideo", "true");
                     File.WriteAllText(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml", document.OuterXml);
+                }
+
+                if (Properties.Settings.Default.importParent)
+                {
+                    EnableParentSetlist(true, songID);
                 }
             }
         }
@@ -894,12 +900,20 @@ namespace GHLCP
             {
                 if (!defaultTracks.Contains(item.SubItems[0].Text))
                 {
-                    EditSong edit = new EditSong(this, item.SubItems[0].Text);
-                    edit.LoadXml();
-                    edit.EnableParentSetlist(enable, item.SubItems[0].Text);
-                    edit.SaveXml();
+                    EnableParentSetlist(enable, item.SubItems[0].Text);
                 }
             }
+        }
+
+        /// <summary>Enable or disable the parent setlists of a single track</summary>
+        /// <param name="enable">Enable parent setlists if true, disable if false</param>
+        /// <param name="id">Id of the track</param>
+        private void EnableParentSetlist(bool enable, string id)
+        {
+            EditSong edit = new EditSong(this, id);
+            edit.LoadXml();
+            edit.EnableParentSetlist(enable, id);
+            edit.SaveXml();
         }
 
         /// <summary>Recursively apply uppercase to each file and directory from the root directory</summary>
@@ -933,7 +947,18 @@ namespace GHLCP
         {
             UppercaseDir(gamedir);
         }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new SettingsForm().ShowDialog();
+        }
     }
+
     // Implements the manual sorting of items by columns.
     class ListViewItemComparer : IComparer
     {
