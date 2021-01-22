@@ -72,6 +72,25 @@
     <Compile Include="AboutGHLCP.Designer.cs">
       <DependentUpon>AboutGHLCP.cs</DependentUpon>
     </Compile>
+    <Compile Include="Gamedir\Platform.cs" />
+    <Compile Include="SearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForm.Designer.cs">
+      <DependentUpon>SearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gamedir\GamedirFactory.cs" />
+    <Compile Include="Gamedir\PlatformPS4.cs" />
+    <Compile Include="Gamedir\PlatformIOS.cs" />
+    <Compile Include="Gamedir\PlatformX360.cs" />
+    <Compile Include="Gamedir\PlatformPS3.cs" />
+    <Compile Include="Gamedir\PlatformWiiU.cs" />
+    <Compile Include="Gamedir\Gamedir.cs" />
+    <Compile Include="Trackconfig\TrackconfigLight.cs" />
+    <Compile Include="Trackconfig\TrackconfigHighway.cs" />
+    <Compile Include="Trackconfig\TrackconfigStagefright.cs" />
+    <Compile Include="Trackconfig\TrackconfigVideo.cs" />
+    <Compile Include="Trackconfig\Trackconfig.cs" />
     <Compile Include="EditSong.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -118,6 +137,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SearchForm.resx">
+      <DependentUpon>SearchForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -155,5 +177,6 @@
     <Content Include="GHLCP.ico" />
     <Content Include="LICENSE.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

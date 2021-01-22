@@ -1,58 +1,38 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Security;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
-using System.Web;
-using System.Collections;
 
 namespace GHLCP
 {
 
     public partial class MainWindow : Form
     {
-        public string platform = "";
-        string version = "";
-        public string gamedir = "";
-
-        public static readonly string[] defaultTracks = { "GHL1003", "GHL1004", "GHL1005", "GHL1006", "GHL1007", "GHL1008", "GHL1009", "GHL1010", "GHL1011", "GHL1012", "GHL1013", "GHL1014", "GHL1015", "GHL1016", "GHL1017", "GHL1018", "GHL1019", "GHL1020", "GHL1021", "GHL1022", "GHL1023", "GHL1024", "GHL1025", "GHL1026", "GHL1027", "GHL1028", "GHL1029", "GHL1030", "GHL1031", "GHL1032", "GHL1033", "GHL1034", "GHL1035", "GHL1036", "GHL1037", "GHL1038", "GHL1039", "GHL1040", "GHL1041", "GHL1042", "GHL1043", "GHL1044", "GHL1045", "TST1798", "GHTVFree" };
+        private Gamedir gamedir;
 
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        private void PopulateInstalled()
+        private void PopulateInstalled() => PopulateInstalled(gamedir);
+
+        private void PopulateInstalled(IEnumerable<Trackconfig> tracks)
         {
             installedListView.Items.Clear();
-            foreach (string path in Directory.GetDirectories(gamedir + "/Audio/AudioTracks"))
+
+            foreach (Trackconfig trackconfig in tracks)
             {
-                if (!File.Exists(path + "/trackconfig.xml"))
-                {
-                    continue;
-                }
-                XmlDocument doc = new XmlDocument();
-                StreamReader file = new StreamReader(path + "/trackconfig.xml", true);
-                doc.Load(file.BaseStream);
-                XmlElement track = doc.DocumentElement;
-                if (track.HasAttribute("intensity"))
-                {
-                    installedListView.Items.Add(new ListViewItem(new string[] { track.GetAttributeNode("id").InnerText, track.GetAttributeNode("trackname").InnerText, track.GetAttributeNode("artist").InnerText, track.GetAttributeNode("intensity").InnerText }));
-                }
-                else
-                {
-                    installedListView.Items.Add(new ListViewItem(new string[] { track.GetAttributeNode("id").InnerText, track.GetAttributeNode("trackname").InnerText, track.GetAttributeNode("artist").InnerText, "0" }));
-                }
-                file.Close();
+                installedListView.Items.Add(trackconfig.GetListViewItem());
             }
+
             installedListView.Sorting = SortOrder.Ascending;
             installedListView.ListViewItemSorter = null;
             installedListView.ColumnClick += ListView_ColumnClick;
@@ -61,18 +41,12 @@ namespace GHLCP
         private void PopulateActive()
         {
             activeListView.Items.Clear();
-            XmlDocument doc = new XmlDocument();
-            doc.Load(gamedir + "/Audio/AudioTracks/Setlists.xml");
-            foreach (XmlElement child in doc.SelectNodes("Classes/Class"))
+
+            foreach (string id in gamedir.Active)
             {
-                if (child.FirstChild.InnerText == "GHLive_Quickplay_AllTracks") 
-                {
-                    foreach (XmlElement track in child.LastChild.ChildNodes)
-                    {
-                        activeListView.Items.Add(GetListViewItem(track.InnerText));
-                    }
-                }
+                activeListView.Items.Add(gamedir[id].GetListViewItem(id));
             }
+
             activeListView.Sorting = SortOrder.Ascending;
             activeListView.ListViewItemSorter = null;
             activeListView.ColumnClick += ListView_ColumnClick;
@@ -83,7 +57,7 @@ namespace GHLCP
         {
             if (((ListViewItemComparer)((ListView)o).ListViewItemSorter) != null && ((ListViewItemComparer)((ListView)o).ListViewItemSorter).col == e.Column)
             {
-                switch(((ListView)o).Sorting)
+                switch (((ListView)o).Sorting)
                 {
                     case SortOrder.Ascending:
                         ((ListViewItemComparer)((ListView)o).ListViewItemSorter).descending = true;
@@ -105,11 +79,11 @@ namespace GHLCP
         private void ReadGameModifications()
         {
             XmlDocument configScore = new XmlDocument();
-            configScore.Load(gamedir + "/Configs/ConfigScore.xml");
+            configScore.Load(gamedir.GetPath("/Configs/ConfigScore.xml"));
             XmlNode singleNoteScore = configScore.SelectNodes("Config/SingleNoteScore")[0];
 
             XmlDocument configStreak = new XmlDocument();
-            configStreak.Load(gamedir + "/Configs/Config_Streak.xml");
+            configStreak.Load(gamedir.GetPath("/Configs/Config_Streak.xml"));
             XmlNode maxMultiplier = configStreak.SelectNodes("Config/MaxMultiplier")[0];
             XmlNode streakPerMultiplierLevel = configStreak.SelectNodes("Config/StreakPerMultiplierLevel")[0];
             XmlNode streakValueExpertTen = configStreak.SelectNodes("Config/StreakValueExpert10")[0];
@@ -120,7 +94,7 @@ namespace GHLCP
             noteStreakFix.Checked = (streakValueExpertTen.InnerText == "999999");
 
             XmlDocument gameui = new XmlDocument();
-            gameui.Load(gamedir + "/UI/GameUI.xml");
+            gameui.Load(gamedir.GetPath("/UI/GameUI.xml"));
             XmlNodeList splashes = gameui.SelectNodes("/Classes/Class/Property/Value/Class/Property/Value/Class/Property/Value/Class[@Type='CGameUISplashScreen']");
             foreach (XmlNode splash in splashes)
             {
@@ -143,24 +117,23 @@ namespace GHLCP
             }
 
             // If opening the past file failed or does not exist
-            if (String.IsNullOrEmpty(gamedir))
+            if (gamedir == null)
             {
                 openGameFileToolStripMenuItem_Click(sender, e);
             }
 
             // If the selected file still fails
-            if (String.IsNullOrEmpty(gamedir))
+            if (gamedir == null)
             {
                 Application.Exit();
-            }
-            else
+            } else
             {
                 string[] args = Environment.GetCommandLineArgs();
                 if (args.Length > 1)
                 {
                     foreach (string arg in args.Skip(1))
                     {
-                        HandleImport(arg);
+                        gamedir.HandleImport(arg);
                     }
                 }
             }
@@ -168,43 +141,13 @@ namespace GHLCP
 
         private void installedRefresh_Click(object sender, EventArgs e)
         {
+            gamedir.ReadInstalled();
             PopulateInstalled();
         }
 
         private void buildXMLItem_Click(object sender, EventArgs e)
         {
-            XmlDocument setlists = new XmlDocument();
-            setlists.Load(gamedir + "/Audio/AudioTracks/Setlists.xml");
-            foreach (XmlElement child in setlists.SelectNodes("Classes/Class"))
-            {
-                if (child.FirstChild.InnerText == "GHLive_Quickplay_AllTracks")
-                {
-                    child.LastChild.RemoveAll();
-                    XmlElement shit = (XmlElement)child.LastChild;
-                    shit.SetAttribute("Name", "Tracks");
-                    foreach (ListViewItem item in activeListView.Items)
-                    {
-                        XmlElement trackelem = setlists.CreateElement("Value");
-                        trackelem.InnerText = item.SubItems[0].Text;
-                        child.LastChild.AppendChild(trackelem);
-                    }
-                }
-            }
-            XmlDocument tracklisting = new XmlDocument();
-            XmlElement elem = tracklisting.CreateElement("Tracks");
-            elem.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-            elem.SetAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
-            foreach (ListViewItem item in activeListView.Items)
-            {
-                XmlElement trackelem = tracklisting.CreateElement("Track");
-                trackelem.SetAttribute("id", item.SubItems[0].Text);
-                elem.AppendChild(trackelem);
-            }
-            tracklisting.AppendChild(elem);
-            File.Copy(gamedir + "/Audio/AudioTracks/Setlists.xml", gamedir + "/Audio/AudioTracks/Setlists.xml.bak", true);
-            File.Copy(gamedir + "/Audio/AudioTracks/Tracklisting.xml", gamedir + "/Audio/AudioTracks/Tracklisting.xml.bak", true);
-            File.WriteAllText(gamedir + "/Audio/AudioTracks/Setlists.xml", setlists.OuterXml);
-            File.WriteAllText(gamedir + "/Audio/AudioTracks/Tracklisting.xml", "<?xml version=\"1.0\" encoding=\"us-ascii\"?>"+tracklisting.OuterXml);
+            gamedir.WriteActive();
             MessageBox.Show("Built and saved Setlists/Tracklisting XML files!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -224,10 +167,11 @@ namespace GHLCP
                 if (installedListView.SelectedIndices.Count == 1)
                 {
                     installedEdit.Enabled = true;
-                } 
+                }
 
-                foreach (ListViewItem selectedItem in installedListView.SelectedItems) {
-                    if (File.Exists(gamedir + "/Audio/AudioTracks/" + selectedItem.SubItems[0].Text + "/manifest.txt") && !defaultTracks.Contains(selectedItem.SubItems[0].Text))
+                foreach (ListViewItem selectedItem in installedListView.SelectedItems)
+                {
+                    if (File.Exists(gamedir.GetPath("/Audio/AudioTracks/" + selectedItem.SubItems[0].Text + "/manifest.txt")) && !gamedir[selectedItem.SubItems[0].Text].IsDefault)
                     {
                         installedRemove.Enabled = true;
                         break;
@@ -235,19 +179,16 @@ namespace GHLCP
                 }
 
                 installedSetActive.Text = "Add To Quickplay";
-                foreach (ListViewItem item in activeListView.Items)
+                foreach (ListViewItem selecteditem in installedListView.SelectedItems)
                 {
-                    foreach (ListViewItem selecteditem in installedListView.SelectedItems)
+                    if (gamedir.Active.Contains(selecteditem.SubItems[0].Text))
                     {
-                        if (item.SubItems[0].Text == selecteditem.SubItems[0].Text)
+                        if (installedListView.SelectedIndices.Count > 1)
                         {
-                            if (installedListView.SelectedIndices.Count > 1)
-                            {
-                                installedSetActive.Enabled = false;
-                            } else
-                            {
-                                installedSetActive.Text = "Remove From Quickplay";
-                            }
+                            installedSetActive.Enabled = false;
+                        } else
+                        {
+                            installedSetActive.Text = "Remove From Quickplay";
                         }
                     }
                 }
@@ -256,16 +197,16 @@ namespace GHLCP
 
         private void activeListView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (activeListView.SelectedIndices.Count) 
+            switch (activeListView.SelectedIndices.Count)
             {
                 case 0:
                     activeRemove.Enabled = false;
-                    activeEdit.Enabled = false; 
+                    activeEdit.Enabled = false;
                     removeFromQuickplayToolStripMenuItem.Enabled = false;
                     break;
 
                 case 1:
-                    activeRemove.Enabled = true; 
+                    activeRemove.Enabled = true;
                     activeEdit.Enabled = true;
                     removeFromQuickplayToolStripMenuItem.Enabled = true;
                     break;
@@ -280,8 +221,9 @@ namespace GHLCP
 
         private void activeRemove_Click(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in activeListView.SelectedItems) 
+            foreach (ListViewItem item in activeListView.SelectedItems)
             {
+                gamedir.Active.Remove(item.SubItems[0].Text);
                 item.Remove();
             }
             trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
@@ -289,40 +231,37 @@ namespace GHLCP
 
         private void installedSetActive_Click(object sender, EventArgs e)
         {
-            bool shouldRemove = false;
-            foreach (ListViewItem item in activeListView.Items)
-            {
-                if (item.SubItems[0].Text == installedListView.SelectedItems[0].SubItems[0].Text)
-                {
-                    shouldRemove = true;
-                }
-            }
+            bool shouldRemove = gamedir.Active.Contains(installedListView.SelectedItems[0].SubItems[0].Text);
+
             if (shouldRemove)
             {
-                foreach (ListViewItem item in activeListView.Items)
+                foreach (ListViewItem item in installedListView.SelectedItems)
                 {
-                    if (item.SubItems[0].Text == installedListView.SelectedItems[0].SubItems[0].Text)
-                    {
-                        item.Remove();
-                        installedSetActive.Text = "Add To Quickplay";
-                    }
+                    gamedir.Active.Remove(item.SubItems[0].Text);
                 }
+
+                installedSetActive.Text = "Add To Quickplay";
+
+                PopulateActive();
             } else
             {
-                foreach(ListViewItem item in installedListView.SelectedItems)
+                foreach (ListViewItem item in installedListView.SelectedItems)
                 {
+                    gamedir.Active.Add(item.SubItems[0].Text);
                     activeListView.Items.Add((ListViewItem)item.Clone());
                     activeListView.Sort();
-                    if (installedListView.SelectedIndices.Count == 1)
-                    {
-                        installedSetActive.Text = "Remove From Quickplay";
-                    } else
-                    {
-                        installedSetActive.Enabled = false;
-                    }
                 }
+
+                if (installedListView.SelectedIndices.Count == 1)
+                {
+                    installedSetActive.Text = "Remove From Quickplay";
+                } else
+                {
+                    installedSetActive.Enabled = false;
+                }
+
+                trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
             }
-            trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
         }
 
         private void activeRefresh_Click(object sender, EventArgs e)
@@ -330,6 +269,7 @@ namespace GHLCP
             bool shouldRefresh = (MessageBox.Show("Are you sure you want to refresh? This will remove all pending changes you have made.", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes);
             if (shouldRefresh)
             {
+                gamedir.ReadActive();
                 PopulateActive();
             }
         }
@@ -364,83 +304,9 @@ namespace GHLCP
         {
             if (ImportSongDialog.ShowDialog() == DialogResult.OK)
             {
-
-                new WaitingForm(this, ImportSongDialog.FileNames).ShowDialog();
+                new WaitingForm(gamedir, ImportSongDialog.FileNames).ShowDialog();
                 PopulateInstalled();
                 PopulateActive();
-            }
-        }
-
-        public void HandleImport(string filename)
-        {
-            using (ZipArchive archive = ZipFile.OpenRead(filename))
-            {
-                string songID = archive.Entries[0].FullName.Split('/')[0];
-                string manifestFile = gamedir + "/Audio/AudioTracks/" + songID + "/manifest.txt";
-                HashSet<string> manifest = File.Exists(manifestFile) ? new HashSet<string>(File.ReadAllLines(manifestFile)) : new HashSet<string>();
-                foreach (ZipArchiveEntry entry in archive.Entries)
-                {
-                    List<string> pathElements = entry.FullName.Split('/').ToList();
-                    if (pathElements.Count >= 4)
-                    {
-                        string extractFor = pathElements[1].ToLower();
-                        pathElements.RemoveRange(0, 2);
-                        string path = platform == "PlayStation 3" ? string.Join("/", pathElements).ToUpper() : string.Join("/", pathElements);
-
-                        if ((extractFor == "master" && platform != "iOS") ||
-                        (extractFor == "360" && platform == "Xbox 360") ||
-                        (extractFor == "ios" && platform == "iOS") ||
-                        (extractFor == "ps4" && platform == "PlayStation 4") ||
-                        (extractFor == "others" && (platform == "PlayStation 4" || platform == "iOS")) ||
-                        (extractFor == "ps3" && platform == "PlayStation 3") ||
-                        (extractFor == "wiiu" && platform == "Wii U"))
-                        {
-                            if (!entry.FullName.EndsWith("/"))
-                            {
-                                manifest.Add(path);
-                                pathElements.RemoveAt(pathElements.Count - 1);
-                                string folderPath = platform == "PlayStation 3" ? string.Join("/", pathElements).ToUpper() : string.Join("/", pathElements);
-                                if (!Directory.Exists(gamedir + "/" + folderPath))
-                                {
-                                    Console.WriteLine($"Creating \"{entry.FullName}\" in \"{gamedir + "/" + folderPath}\"");
-                                    Directory.CreateDirectory(gamedir + "/" + folderPath);
-                                }
-                                Console.WriteLine($"Copying \"{entry.FullName}\" to \"{gamedir + "/" + path}\"");
-                                entry.ExtractToFile(gamedir + "/" + path, true);
-                            }
-                        }
-                    }
-                }
-
-                File.WriteAllLines(manifestFile, manifest.ToArray());
-
-                if (platform == "iOS")
-                {
-                    XmlDocument document = new XmlDocument();
-                    document.Load(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml");
-                    XmlNode video = document.SelectSingleNode("Track/Video");
-                    ((XmlElement)video).SetAttribute("hasVideo", "false");
-                    File.WriteAllText(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml", document.OuterXml);
-                }
-
-                // Sets the video to true when importing video
-                if (Properties.Settings.Default.importVideo && manifest.Where(file => file.ToLower().EndsWith("video.xml")).Count() > 0)
-                {
-                    if (!File.Exists(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml"))
-                    {
-                        throw new ArgumentException("Trackconfig not found. Please import the track data before the video");
-                    }
-                    XmlDocument document = new XmlDocument();
-                    document.Load(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml");
-                    XmlNode video = document.SelectSingleNode("Track/Video");
-                    ((XmlElement)video).SetAttribute("hasVideo", "true");
-                    File.WriteAllText(gamedir + "/Audio/AudioTracks/" + songID + "/trackconfig.xml", document.OuterXml);
-                }
-
-                if (Properties.Settings.Default.importParent)
-                {
-                    EnableParentSetlist(true, songID);
-                }
             }
         }
 
@@ -448,39 +314,26 @@ namespace GHLCP
         {
             string msg = "";
 
-            foreach (ListViewItem item in installedListView.SelectedItems) 
+            foreach (ListViewItem item in installedListView.SelectedItems)
             {
-                if (File.Exists(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/manifest.txt"))
-                {
-                    if (defaultTracks.Contains(item.SubItems[0].Text)) 
-                    {
-                        msg += "ID " + item.SubItems[0].Text + ", " + item.SubItems[1].Text + " by " + item.SubItems[2].Text + " is a default track and therefore can not be safely removed.\n";
-                    } else 
-                    {
-                        string[] filesToRemove = File.ReadAllLines(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/manifest.txt");
-                        foreach (string filepath in filesToRemove) 
-                        {
-                            if (filepath.EndsWith("/") || filepath == "") 
-                            {
+                Trackconfig trackconfig = gamedir[item.SubItems[0].Text];
 
-                            } else 
-                            {
-                                try
-                                {
-                                    File.Delete(gamedir + "/" + filepath);
-                                } catch (Exception) { }
-                                
-                            }
-                        }
-                        File.Delete(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/manifest.txt");
-                    }
-                } else 
+                if (File.Exists(gamedir.GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/manifest.txt")))
                 {
-                    msg += "ID " + item.SubItems[0].Text + ", " + item.SubItems[1].Text + " by " + item.SubItems[2].Text + " doesn't have a manifest and therefore can not be safely removed.\n";
+                    if (trackconfig.IsDefault)
+                    {
+                        msg += "ID " + trackconfig.Id + ", " + trackconfig.Trackname + " by " + trackconfig.Artist + " is a default track and therefore can not be safely removed.\n";
+                    } else
+                    {
+                        gamedir.RemoveTrack(trackconfig);
+                    }
+                } else
+                {
+                    msg += "ID " + trackconfig.Id + ", " + trackconfig.Trackname + " by " + trackconfig.Artist + " doesn't have a manifest and therefore can not be safely removed.\n";
                 }
             }
-            
-            if (msg != "") 
+
+            if (msg != "")
             {
                 MessageBox.Show(msg, "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -507,17 +360,17 @@ namespace GHLCP
                 "Sorry for the inquiry, but why does Guitar Hero Live GHTV mode not work?",
                 "wheres ghtv on guitar hero please i can't sleep i've been feeling ill i have the shakes,,,., just bring it back... please...."
             };
-            Process.Start("https://twitter.com/intent/tweet?text=@ATVIAssist%20"+funnyQuoteHaha[new Random().Next(funnyQuoteHaha.Length)].Replace(" ", "%20"));
+            Process.Start("https://twitter.com/intent/tweet?text=@ATVIAssist%20" + funnyQuoteHaha[new Random().Next(funnyQuoteHaha.Length)].Replace(" ", "%20"));
         }
 
         private void saveModsItem_Click(object sender, EventArgs e)
         {
             XmlDocument configScore = new XmlDocument();
-            configScore.Load(gamedir + "/Configs/ConfigScore.xml");
+            configScore.Load(gamedir.GetPath("/Configs/ConfigScore.xml"));
             XmlNode singleNoteScore = configScore.SelectNodes("Config/SingleNoteScore")[0];
 
             XmlDocument configStreak = new XmlDocument();
-            configStreak.Load(gamedir + "/Configs/Config_Streak.xml");
+            configStreak.Load(gamedir.GetPath("/Configs/Config_Streak.xml"));
             XmlNode maxMultiplier = configStreak.SelectNodes("Config/MaxMultiplier")[0];
             XmlNode streakPerMultiplierLevel = configStreak.SelectNodes("Config/StreakPerMultiplierLevel")[0];
             XmlNode streakValueExpertTen = configStreak.SelectNodes("Config/StreakValueExpert10")[0];
@@ -532,17 +385,17 @@ namespace GHLCP
             {
                 streakValueExpertTen.InnerText = "900";
             }
-            
-            if (!File.Exists(gamedir + "/Audio/AudioTracks/Setlists.xml.bak") || !File.Exists(gamedir + "/Audio/AudioTracks/Tracklisting.xml.bak"))
+
+            if (!File.Exists(gamedir.GetPath("/Audio/AudioTracks/Setlists.xml.bak")) || !File.Exists(gamedir.GetPath("/Audio/AudioTracks/Tracklisting.xml.bak")))
             {
-                File.Copy(gamedir + "/Audio/AudioTracks/Setlists.xml", gamedir + "/Audio/AudioTracks/Setlists.xml.bak", true);
-                File.Copy(gamedir + "/Audio/AudioTracks/Tracklisting.xml", gamedir + "/Audio/AudioTracks/Tracklisting.xml.bak", true);
+                gamedir.Backup(gamedir.GetPath("/Audio/AudioTracks/Setlists.xml"));
+                gamedir.Backup(gamedir.GetPath("/Audio/AudioTracks/Tracklisting.xml"));
             }
-            File.WriteAllText(gamedir + "/Configs/ConfigScore.xml", configScore.OuterXml);
-            File.WriteAllText(gamedir + "/Configs/Config_Streak.xml", configStreak.OuterXml);
+            File.WriteAllText(gamedir.GetPath("/Configs/ConfigScore.xml"), configScore.OuterXml);
+            File.WriteAllText(gamedir.GetPath("/Configs/Config_Streak.xml"), configStreak.OuterXml);
 
             XmlDocument gameui = new XmlDocument();
-            gameui.Load(gamedir + "/UI/GameUI.xml");
+            gameui.Load(gamedir.GetPath("/UI/GameUI.xml"));
             XmlNodeList splashes = gameui.SelectNodes("/Classes/Class/Property/Value/Class/Property/Value/Class/Property/Value/Class[@Type='CGameUISplashScreen']");
             foreach (XmlNode splash in splashes)
             {
@@ -575,20 +428,15 @@ namespace GHLCP
                 }
             }
 
-            File.Copy(gamedir + "/UI/GameUI.xml", gamedir + "/UI/GameUI.xml.bak", true);
-            File.WriteAllText(gamedir + "/UI/GameUI.xml", gameui.OuterXml);
+            gamedir.Backup(gamedir.GetPath("/UI/GameUI.xml"));
+            File.WriteAllText(gamedir.GetPath("/UI/GameUI.xml"), gameui.OuterXml);
 
             MessageBox.Show("Saved modified game files!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            
-        }
-
         private void installedEdit_Click(object sender, EventArgs e)
         {
-            if (new EditSong(this, installedListView.SelectedItems[0].SubItems[0].Text).ShowDialog() == DialogResult.Yes)
+            if (new EditSong(gamedir, gamedir[installedListView.SelectedItems[0].SubItems[0].Text]).ShowDialog() == DialogResult.Yes)
             {
                 PopulateInstalled();
                 PopulateActive();
@@ -597,7 +445,7 @@ namespace GHLCP
 
         private void activeEdit_Click(object sender, EventArgs e)
         {
-            if (new EditSong(this, activeListView.SelectedItems[0].SubItems[0].Text).ShowDialog() == DialogResult.Yes)
+            if (new EditSong(gamedir, gamedir[activeListView.SelectedItems[0].SubItems[0].Text]).ShowDialog() == DialogResult.Yes)
             {
                 PopulateInstalled();
                 PopulateActive();
@@ -606,22 +454,21 @@ namespace GHLCP
 
         private void applyHyperspeed_Click(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in installedListView.Items)
+            TrackconfigHighway highway = new TrackconfigHighway()
             {
-                XmlDocument document = new XmlDocument();
-                document.Load(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml");
-                XmlNode highway = document.SelectSingleNode("Track/Highway");
-                ((XmlElement)highway).SetAttribute("newbeginner", speedBBox.Value.ToString());
-                ((XmlElement)highway).SetAttribute("neweasy", speedEBox.Value.ToString());
-                ((XmlElement)highway).SetAttribute("newmedium", speedMBox.Value.ToString());
-                ((XmlElement)highway).SetAttribute("newhard", speedHBox.Value.ToString());
-                ((XmlElement)highway).SetAttribute("newexpert", speedXBox.Value.ToString());
-                if (!File.Exists(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml.bak"))
-                {
-                    File.Copy(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml", gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml.bak", true);
-                }
-                File.WriteAllText(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml", document.OuterXml);
+                Beginner = Convert.ToDouble(speedBBox.Value),
+                Easy = Convert.ToDouble(speedEBox.Value),
+                Medium = Convert.ToDouble(speedMBox.Value),
+                Hard = Convert.ToDouble(speedHBox.Value),
+                Expert = Convert.ToDouble(speedXBox.Value)
+            };
+
+            foreach (Trackconfig trackconfig in gamedir)
+            {
+                trackconfig.Highway = highway.Clone() as TrackconfigHighway;
+                gamedir.WriteTrackconfig(trackconfig);
             }
+
             MessageBox.Show("Applied batch highway speeds!", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -630,56 +477,29 @@ namespace GHLCP
             DialogResult dialog = MessageBox.Show("This will disable all background videos on stock songs in order to resolve issues on truncated copies of the game. Are you sure you want to continue?", "Guitar Hero Live Control Panel", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
             if (dialog == DialogResult.Yes)
             {
-                foreach (string track in defaultTracks)
+                foreach (Trackconfig trackconfig in gamedir.Where(track => track.IsDefault))
                 {
-                    if (File.Exists(gamedir + "/Audio/AudioTracks/" + track + "/trackconfig.xml"))
-                    {
-                        XmlDocument document = new XmlDocument();
-                        document.Load(gamedir + "/Audio/AudioTracks/" + track + "/trackconfig.xml");
-                        XmlNode video = document.SelectSingleNode("Track/Video");
-                        ((XmlElement)video).SetAttribute("hasVideo", "false");
-                        if (!File.Exists(gamedir + "/Audio/AudioTracks/" + track + "/trackconfig.xml.bak"))
-                        {
-                            File.Copy(gamedir + "/Audio/AudioTracks/" + track + "/trackconfig.xml", gamedir + "/Audio/AudioTracks/" + track + "/trackconfig.xml.bak", true);
-                        }
-                        File.WriteAllText(gamedir + "/Audio/AudioTracks/" + track + "/trackconfig.xml", document.OuterXml);
-                    }
+                    trackconfig.Video.HasVideo = false;
+                    gamedir.WriteTrackconfig(trackconfig);
                 }
             }
         }
 
         private void disableAllVideosItem_Click(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in installedListView.Items)
+            foreach (Trackconfig trackconfig in gamedir)
             {
-                XmlDocument document = new XmlDocument();
-                document.Load(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml");
-                XmlNode video = document.SelectSingleNode("Track/Video");
-                ((XmlElement)video).SetAttribute("hasVideo", "false");
-                if (!File.Exists(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml.bak"))
-                {
-                    File.Copy(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml", gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml.bak", true);
-                }
-                File.WriteAllText(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml", document.OuterXml);
+                trackconfig.Video.HasVideo = false;
+                gamedir.WriteTrackconfig(trackconfig);
             }
         }
 
         private void enableCustomVIdeosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in installedListView.Items)
+            foreach (Trackconfig trackconfig in gamedir.Where(track => !track.IsDefault))
             {
-                if (!defaultTracks.Contains(item.SubItems[0].Text))
-                {
-                    XmlDocument document = new XmlDocument();
-                    document.Load(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml");
-                    XmlNode video = document.SelectSingleNode("Track/Video");
-                    ((XmlElement)video).SetAttribute("hasVideo", "true");
-                    if (!File.Exists(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml.bak"))
-                    {
-                        File.Copy(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml", gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml.bak", true);
-                    }
-                    File.WriteAllText(gamedir + "/Audio/AudioTracks/" + item.SubItems[0].Text + "/trackconfig.xml", document.OuterXml);
-                }
+                trackconfig.Video.HasVideo = true;
+                gamedir.WriteTrackconfig(trackconfig);
             }
         }
 
@@ -696,7 +516,7 @@ namespace GHLCP
             EnableCustomParentSetlists(false);
         }
 
-        private void launchInRPCS3ToolStripMenuItem_Click(object sender, EventArgs e) 
+        private void launchInRPCS3ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!File.Exists(Properties.Settings.Default.rpcs3Exe))
             {
@@ -736,94 +556,37 @@ namespace GHLCP
 
             if (openCsvDialog.ShowDialog() == DialogResult.OK)
             {
-                activeListView.Items.Clear();
-
-                // Skips .csv header
-                foreach (string track in File.ReadAllLines(openCsvDialog.FileName).Skip(1))
-                {
-                    activeListView.Items.Add(GetListViewItem(track.Split(',')[0]));
-                }
-
-                trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
+                gamedir.ImportSonglistCSV(openCsvDialog.FileName);
+                PopulateActive();
             }
         }
 
         private void exportCSVToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string output = "Id,Artist,Title,Intensity";
-            foreach (ListViewItem item in activeListView.Items)
-            {
-                output += "\n";
-                output += item.SubItems[0].Text + "," + item.SubItems[2].Text + "," + item.SubItems[1].Text + "," + item.SubItems[3].Text;
-            }
             if (saveCSVDialog.ShowDialog() == DialogResult.OK)
             {
-                File.WriteAllText(saveCSVDialog.FileName, output);
+                gamedir.ExportSonglistCSV(saveCSVDialog.FileName);
             }
         }
 
         private void randomizeSonglistToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<int> pool = new List<int>(Enumerable.Range(0, installedListView.Items.Count));
-            Random random = new Random();
-            int i;
-
-            activeListView.Items.Clear();
-
-            while (activeListView.Items.Count < 50 && pool.Count > 0)
-            {
-                i = random.Next(pool.Count);
-                activeListView.Items.Add((ListViewItem)installedListView.Items[pool[i]].Clone());
-                pool.RemoveAt(i);
-            }
-
-            trackCountLabel.Text = "Track count:" + activeListView.Items.Count + "/" + installedListView.Items.Count;
+            gamedir.RandomizeSonglist();
+            PopulateActive();
         }
 
         /// <summary>Opens the selected game files.</summary>
         /// <param name="path">Path to the executable of the Guitar Hero Live installation.</param>
         private void OpenGameFiles(string path)
         {
-            // Temporary variables
-            string platform, gamedir;
-
             try
             {
-                List<String> filenames = path.Split(Path.DirectorySeparatorChar).ToList<String>();
-                string filename = filenames[filenames.Count - 1];
-
-                switch (filename)
-                {
-                    case "GHLive.rpx":
-                        platform = "Wii U";
-                        filenames.Remove(filename);
-                        filenames.Remove("code");
-                        filenames.Add("content");
-                        Properties.Settings.Default.initialDirectory = String.Join("/", filenames);
-                        gamedir = String.Join("/", filenames);
-                        break;
-                    case "EBOOT.BIN":
-                        platform = "PlayStation 3";
-                        filenames.Remove(filename);
-                        Properties.Settings.Default.initialDirectory = String.Join("/", filenames);
-                        gamedir = String.Join("/", filenames);
-                        break;
-                    case "default.xex":
-                        platform = "Xbox 360";
-                        filenames.Remove(filename);
-                        Properties.Settings.Default.initialDirectory = String.Join("/", filenames);
-                        gamedir = String.Join("/", filenames);
-                        break;
-                    case "GHLive":
-                        platform = "iOS";
-                        filenames.Remove(filename);
-                        Properties.Settings.Default.initialDirectory = String.Join("/", filenames);
-                        gamedir = String.Join("/", filenames);
-                        break;
-                    default:
-                        MessageBox.Show("That isn't a Guitar Hero Live executable!");
-                        return;
-                }
+                gamedir = GamedirFactory.Get(path);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
             catch (SecurityException ex)
             {
@@ -832,50 +595,29 @@ namespace GHLCP
                 return;
             }
 
-            if (!File.Exists(gamedir + "/Audio/AudioTracks/Setlists.xml"))
+            if (!File.Exists(gamedir.GetPath("/Audio/AudioTracks/Setlists.xml")))
             {
                 MessageBox.Show("This copy of the game is not extracted correctly (or is not GHL at all!). Please extract the game and try again.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
-            if (File.Exists(gamedir + "/FAR/DiscOnly/GameBoot.far"))
+            if (File.Exists(gamedir.GetPath("/FAR/DiscOnly/GameBoot.far")))
             {
                 MessageBox.Show("\"gameboot.far\" exists in your GHL install directory. GHLCP will now remove this to enable custom tracks to appear in the quickplay menu.", "Guitar Hero Live Control Panel", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 File.Delete(gamedir + "/FAR/DiscOnly/GameBoot.far");
                 return;
             }
 
-            // Sets new values
-            Text = $"Guitar Hero Live Control Panel ({platform})";
-            this.platform = platform;
-            this.gamedir = gamedir;
-            launchInRPCS3ToolStripMenuItem.Enabled = uppercaseFix.Enabled = platform == "PlayStation 3";
+            Text = $"Guitar Hero Live Control Panel ({gamedir.Platform})";
+            launchInRPCS3ToolStripMenuItem.Enabled = uppercaseFix.Enabled = gamedir.Platform is PlatformPS3;
 
+            Properties.Settings.Default.initialDirectory = gamedir.ToString();
             Properties.Settings.Default.pastFile = path;
             Properties.Settings.Default.Save();
 
             PopulateInstalled();
             PopulateActive();
             ReadGameModifications();
-        }
-
-        /// <summary>Gets a <see cref="ListViewItem"/> with the trackconfig information of the selected id.</summary>
-        /// <param name="id">Id of the selected song.</param>
-        /// <returns>Returns a <see cref="ListViewItem"/> with the trackconfig information of the selected id.
-        /// Returns a <see cref="ListViewItem"/> indicating an error if the selected id doesn't have a trackconfig file.</returns>
-        private ListViewItem GetListViewItem(string id)
-        {
-            if (File.Exists(gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml"))
-            {
-                XmlDocument document = new XmlDocument();
-                document.Load(gamedir + "/Audio/AudioTracks/" + id + "/trackconfig.xml");
-                XmlElement trackconfig = document.DocumentElement;
-                return new ListViewItem(new string[] { trackconfig.GetAttributeNode("id").InnerText, trackconfig.GetAttributeNode("trackname").InnerText, trackconfig.GetAttributeNode("artist").InnerText, trackconfig.HasAttribute("intensity") ? trackconfig.GetAttributeNode("intensity").InnerText : "0" });
-            }
-            else
-            {
-                return new ListViewItem(new string[] { id, "Track unavailable" }) { ForeColor = Color.Red };
-            }
         }
 
         private void openGameFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -896,24 +638,11 @@ namespace GHLCP
         /// <param name="enable">Enable parent setlists if true, disable if false</param>
         private void EnableCustomParentSetlists(bool enable)
         {
-            foreach (ListViewItem item in installedListView.Items)
+            foreach (Trackconfig trackconfig in gamedir.Where(track => !track.IsDefault && track.Stagefright.Enabled != enable))
             {
-                if (!defaultTracks.Contains(item.SubItems[0].Text))
-                {
-                    EnableParentSetlist(enable, item.SubItems[0].Text);
-                }
+                gamedir.SetParentSetlist(trackconfig, enable);
+                gamedir.WriteTrackconfig(trackconfig);
             }
-        }
-
-        /// <summary>Enable or disable the parent setlists of a single track</summary>
-        /// <param name="enable">Enable parent setlists if true, disable if false</param>
-        /// <param name="id">Id of the track</param>
-        private void EnableParentSetlist(bool enable, string id)
-        {
-            EditSong edit = new EditSong(this, id);
-            edit.LoadXml();
-            edit.EnableParentSetlist(enable, id);
-            edit.SaveXml();
         }
 
         /// <summary>Recursively apply uppercase to each file and directory from the root directory</summary>
@@ -940,12 +669,12 @@ namespace GHLCP
 
         private void openInFileExplorerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start(@gamedir);
+            Process.Start(@gamedir.ToString());
         }
 
         private void uppercaseFix_Click(object sender, EventArgs e)
         {
-            UppercaseDir(gamedir);
+            UppercaseDir(gamedir.ToString());
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -956,6 +685,42 @@ namespace GHLCP
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             new SettingsForm().ShowDialog();
+        }
+
+        private void activeClear_Click(object sender, EventArgs e)
+        {
+            gamedir.Active = new List<string>();
+            PopulateActive();
+        }
+
+        private void searchInstalled_Click(object sender, EventArgs e)
+        {
+            SearchForm search = new SearchForm(gamedir);
+
+            if (search.ShowDialog() == DialogResult.Yes)
+            {
+                PopulateInstalled(search.Result);
+            }
+        }
+
+        private void searchBox_TextChanged(object sender, EventArgs e)
+        {
+            PopulateInstalled(gamedir.Where(track => track.Trackname.ToLower().Contains(searchBox.Text.ToLower()) || track.Artist.ToLower().Contains(searchBox.Text.ToLower())));
+        }
+    }
+
+    public static class TrackconfigExtension
+    {
+        public static ListViewItem GetListViewItem(this Trackconfig trackconfig)
+        {
+            return new ListViewItem(new string[] { trackconfig.Id, trackconfig.Trackname, trackconfig.Artist, trackconfig.Intensity.ToString() });
+        }
+
+        public static ListViewItem GetListViewItem(this Trackconfig trackconfig, string id)
+        {
+            if (trackconfig == null)
+                return new ListViewItem(new string[] { id, "Track unavailable" }) { ForeColor = Color.Red };
+            return trackconfig.GetListViewItem();
         }
     }
 
@@ -981,7 +746,7 @@ namespace GHLCP
             {
                 return String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
             }
-            
+
         }
     }
 }

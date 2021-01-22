@@ -13,14 +13,16 @@ namespace GHLCP
 {
     public partial class WaitingForm : Form
     {
-        private readonly MainWindow mainWindow;
+        private readonly Gamedir gamedir;
         private readonly string[] filenames;
 
-        public WaitingForm(MainWindow mainWindow, string[] filenames)
+        public WaitingForm(Gamedir gamedir, string[] filenames)
         {
             InitializeComponent();
-            this.mainWindow = mainWindow;
+            this.gamedir = gamedir;
             this.filenames = filenames;
+
+            gamedir.ImportProgressChanged += gamedir_ImportProgressChanged;
             importProgressBar.Maximum = filenames.Length;
         }
 
@@ -40,15 +42,21 @@ namespace GHLCP
                     break;
                 }
 
-                mainWindow.HandleImport(file);
+                gamedir.HandleImport(file);
                 importBackgroundWorker.ReportProgress(1);
             }
         }
 
         private void importBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            importProgressBar.Value += e.ProgressPercentage;
-            UpdateStatusLabel();
+            if (e.UserState is ImportProgressChangedEventArgs progress)
+            {
+                progressLabel.Text = progress.Message;
+            } else
+            {
+                importProgressBar.Value += e.ProgressPercentage;
+                UpdateStatusLabel();
+            }
         }
 
         private void importBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -59,16 +67,22 @@ namespace GHLCP
                 statusLabel.ForeColor = Color.Red;
             } else if (e.Error != null)
             {
-                statusLabel.Text = e.Error is ArgumentException ? e.Error.Message : "An unknown error occurred while importing one or more of your songs";
+                statusLabel.Text = e.Error is InvalidOperationException ? e.Error.Message : "An unknown error occurred while importing " + Path.GetFileName(filenames[importProgressBar.Value]);
                 statusLabel.ForeColor = Color.Red;
             } else
             {
                 statusLabel.Text = "Track import completed";
                 statusLabel.ForeColor = Color.Green;
             }
-            
+
+            progressLabel.Text = "";
             cancelButton.Enabled = true;
             cancelButton.Text = "Close";
+        }
+
+        private void gamedir_ImportProgressChanged(object sender, ImportProgressChangedEventArgs e)
+        {
+            importBackgroundWorker.ReportProgress(0, e);
         }
 
         private void cancelButton_Click(object sender, EventArgs e)

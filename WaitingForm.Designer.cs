@@ -32,6 +32,7 @@
             this.importProgressBar = new System.Windows.Forms.ProgressBar();
             this.importBackgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.cancelButton = new System.Windows.Forms.Button();
+            this.progressLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // statusLabel
@@ -45,9 +46,9 @@
             // 
             // importProgressBar
             // 
-            this.importProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.importProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.importProgressBar.Location = new System.Drawing.Point(12, 25);
+            this.importProgressBar.Location = new System.Drawing.Point(12, 45);
             this.importProgressBar.Maximum = 1;
             this.importProgressBar.Name = "importProgressBar";
             this.importProgressBar.Size = new System.Drawing.Size(339, 23);
@@ -64,7 +65,8 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(276, 54);
+            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cancelButton.Location = new System.Drawing.Point(276, 74);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 2;
@@ -72,17 +74,25 @@
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
+            // progressLabel
+            // 
+            this.progressLabel.AutoSize = true;
+            this.progressLabel.Location = new System.Drawing.Point(13, 26);
+            this.progressLabel.Name = "progressLabel";
+            this.progressLabel.Size = new System.Drawing.Size(0, 13);
+            this.progressLabel.TabIndex = 3;
+            // 
             // WaitingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(363, 83);
+            this.ClientSize = new System.Drawing.Size(363, 103);
             this.ControlBox = false;
+            this.Controls.Add(this.progressLabel);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.importProgressBar);
             this.Controls.Add(this.statusLabel);
-            this.MaximumSize = new System.Drawing.Size(379, 122);
-            this.MinimumSize = new System.Drawing.Size(379, 122);
+            this.MinimumSize = new System.Drawing.Size(379, 142);
             this.Name = "WaitingForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Guitar Hero Live Control Panel";
@@ -98,5 +108,6 @@
         private System.Windows.Forms.ProgressBar importProgressBar;
         private System.ComponentModel.BackgroundWorker importBackgroundWorker;
         private System.Windows.Forms.Button cancelButton;
+        private System.Windows.Forms.Label progressLabel;
     }
 }

@@ -38,6 +38,8 @@
             this.installedIntensityHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.songTabs = new System.Windows.Forms.TabControl();
             this.installedTracks = new System.Windows.Forms.TabPage();
+            this.searchInstalled = new System.Windows.Forms.Button();
+            this.searchBox = new System.Windows.Forms.TextBox();
             this.installedControls = new System.Windows.Forms.Panel();
             this.installedSetActive = new System.Windows.Forms.Button();
             this.installedRemove = new System.Windows.Forms.Button();
@@ -52,6 +54,7 @@
             this.contextMenuStripActiveList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.removeFromQuickplayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.activeControls = new System.Windows.Forms.Panel();
+            this.activeClear = new System.Windows.Forms.Button();
             this.trackCountLabel = new System.Windows.Forms.Label();
             this.activeRemove = new System.Windows.Forms.Button();
             this.activeRefresh = new System.Windows.Forms.Button();
@@ -94,6 +97,7 @@
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.openInFileExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.launchInRPCS3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveStrip = new System.Windows.Forms.ToolStripMenuItem();
@@ -121,7 +125,6 @@
             this.fuckYouActivision = new System.Windows.Forms.ToolStripMenuItem();
             this.ImportSongDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveCSVDialog = new System.Windows.Forms.SaveFileDialog();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.songTabs.SuspendLayout();
             this.installedTracks.SuspendLayout();
             this.installedControls.SuspendLayout();
@@ -164,7 +167,7 @@
             this.installedListView.HideSelection = false;
             this.installedListView.Location = new System.Drawing.Point(6, 6);
             this.installedListView.Name = "installedListView";
-            this.installedListView.Size = new System.Drawing.Size(524, 453);
+            this.installedListView.Size = new System.Drawing.Size(524, 429);
             this.installedListView.TabIndex = 0;
             this.installedListView.UseCompatibleStateImageBehavior = false;
             this.installedListView.View = System.Windows.Forms.View.Details;
@@ -203,6 +206,8 @@
             // 
             // installedTracks
             // 
+            this.installedTracks.Controls.Add(this.searchInstalled);
+            this.installedTracks.Controls.Add(this.searchBox);
             this.installedTracks.Controls.Add(this.installedControls);
             this.installedTracks.Controls.Add(this.installedListView);
             this.installedTracks.Location = new System.Drawing.Point(4, 22);
@@ -212,6 +217,27 @@
             this.installedTracks.TabIndex = 0;
             this.installedTracks.Text = "Installed Tracks";
             this.installedTracks.UseVisualStyleBackColor = true;
+            // 
+            // searchInstalled
+            // 
+            this.searchInstalled.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchInstalled.Location = new System.Drawing.Point(407, 439);
+            this.searchInstalled.Name = "searchInstalled";
+            this.searchInstalled.Size = new System.Drawing.Size(123, 23);
+            this.searchInstalled.TabIndex = 7;
+            this.searchInstalled.Text = "More search options ...";
+            this.searchInstalled.UseVisualStyleBackColor = true;
+            this.searchInstalled.Click += new System.EventHandler(this.searchInstalled_Click);
+            // 
+            // searchBox
+            // 
+            this.searchBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.searchBox.Location = new System.Drawing.Point(8, 441);
+            this.searchBox.Name = "searchBox";
+            this.searchBox.Size = new System.Drawing.Size(393, 20);
+            this.searchBox.TabIndex = 2;
+            this.searchBox.TextChanged += new System.EventHandler(this.searchBox_TextChanged);
             // 
             // installedControls
             // 
@@ -339,6 +365,7 @@
             // 
             // activeControls
             // 
+            this.activeControls.Controls.Add(this.activeClear);
             this.activeControls.Controls.Add(this.trackCountLabel);
             this.activeControls.Controls.Add(this.activeRemove);
             this.activeControls.Controls.Add(this.activeRefresh);
@@ -349,10 +376,20 @@
             this.activeControls.Size = new System.Drawing.Size(535, 29);
             this.activeControls.TabIndex = 3;
             // 
+            // activeClear
+            // 
+            this.activeClear.Location = new System.Drawing.Point(62, 3);
+            this.activeClear.Name = "activeClear";
+            this.activeClear.Size = new System.Drawing.Size(53, 23);
+            this.activeClear.TabIndex = 6;
+            this.activeClear.Text = "Clear";
+            this.activeClear.UseVisualStyleBackColor = true;
+            this.activeClear.Click += new System.EventHandler(this.activeClear_Click);
+            // 
             // trackCountLabel
             // 
             this.trackCountLabel.AutoSize = true;
-            this.trackCountLabel.Location = new System.Drawing.Point(62, 8);
+            this.trackCountLabel.Location = new System.Drawing.Point(121, 8);
             this.trackCountLabel.Name = "trackCountLabel";
             this.trackCountLabel.Size = new System.Drawing.Size(71, 13);
             this.trackCountLabel.TabIndex = 5;
@@ -615,7 +652,6 @@
             this.showActiSplash.TabIndex = 0;
             this.showActiSplash.Text = "Activision Sting";
             this.showActiSplash.UseVisualStyleBackColor = true;
-            this.showActiSplash.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // GHTVMaxUpgrades
             // 
@@ -827,6 +863,11 @@
             this.launchInRPCS3ToolStripMenuItem.Text = "Launch in RPCS3";
             this.launchInRPCS3ToolStripMenuItem.Click += new System.EventHandler(this.launchInRPCS3ToolStripMenuItem_Click);
             // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(215, 6);
+            // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
@@ -1028,11 +1069,6 @@
             this.saveCSVDialog.Filter = "CSV file|*.csv|All files|*.*";
             this.saveCSVDialog.Title = "Export Songlist CSV";
             // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(215, 6);
-            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1047,6 +1083,7 @@
             this.Load += new System.EventHandler(this.MainWindow_Load);
             this.songTabs.ResumeLayout(false);
             this.installedTracks.ResumeLayout(false);
+            this.installedTracks.PerformLayout();
             this.installedControls.ResumeLayout(false);
             this.activeTracks.ResumeLayout(false);
             this.contextMenuStripActiveList.ResumeLayout(false);
@@ -1172,6 +1209,9 @@
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.Button activeClear;
+        private System.Windows.Forms.Button searchInstalled;
+        private System.Windows.Forms.TextBox searchBox;
     }
 }
 
