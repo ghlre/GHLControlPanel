@@ -22,7 +22,6 @@ namespace GHLCP
             this.gamedir = gamedir;
             this.filenames = filenames;
 
-            gamedir.ImportProgressChanged += gamedir_ImportProgressChanged;
             importProgressBar.Maximum = filenames.Length;
         }
 
@@ -34,6 +33,8 @@ namespace GHLCP
 
         private void importBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            gamedir.ImportProgressChanged += gamedir_ImportProgressChanged;
+
             foreach (string file in filenames)
             {
                 if (importBackgroundWorker.CancellationPending)
@@ -61,6 +62,8 @@ namespace GHLCP
 
         private void importBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            gamedir.ImportProgressChanged -= gamedir_ImportProgressChanged;
+
             if (e.Cancelled)
             {
                 statusLabel.Text = "Track import canceled";

@@ -55,7 +55,7 @@
             this.ghlCpVersion.Name = "ghlCpVersion";
             this.ghlCpVersion.Size = new System.Drawing.Size(100, 15);
             this.ghlCpVersion.TabIndex = 2;
-            this.ghlCpVersion.Text = "version 0.4-beta";
+            this.ghlCpVersion.Text = "version 0.4.1-beta";
             // 
             // dby
             // 

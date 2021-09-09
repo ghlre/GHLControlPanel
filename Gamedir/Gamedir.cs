@@ -266,10 +266,24 @@ namespace GHLCP
                     trackconfigChanged = true;
                 }
 
-                if (Properties.Settings.Default.importParent && !trackconfig.Stagefright.Enabled)
+                if (Properties.Settings.Default.importParent)
                 {
-                    SetParentSetlist(trackconfig, true);
-                    trackconfigChanged = true;
+                    if (!trackconfig.Stagefright.Enabled)
+                    {
+                        SetParentSetlist(trackconfig, true);
+                        trackconfigChanged = true;
+                    } else
+                    {
+                        // Only move video files as they may have been imported after the trackconfig which already has parent setlist enabled
+                        string parentSetlist = trackconfig.Stagefright.ParentSetlist;
+                        string source = GetVideoRelPath(parentSetlist, false);
+                        string dest = GetVideoRelPath(parentSetlist, true);
+
+                        if (File.Exists(GetPath("/" + source + "video.xml")))
+                        {
+                            MoveVideo(trackconfig, source, dest);
+                        }
+                    }
                 }
 
                 if (trackconfigChanged)
@@ -336,16 +350,11 @@ namespace GHLCP
             TrackconfigStagefright stagefright = trackconfig.Stagefright;
 
             // Video files
-            string source = platform.GetRelPath(stagefright.Enabled ? "setlists/" + stagefright.ParentSetlist + "/video/positive/" : "Video/" + stagefright.ParentSetlist + "/positive/");
-            string dest = platform.GetRelPath(enable ? "setlists/" + parentSetlist + "/video/positive/" : "Video/" + parentSetlist + "/positive/");
+            string source = GetVideoRelPath(stagefright.ParentSetlist, stagefright.Enabled);
+            string dest = GetVideoRelPath(parentSetlist, enable);
 
             if (source != dest && File.Exists(GetPath("/" + source + "video.xml")))
             {
-                if (!Directory.Exists(GetPath("/" + dest)))
-                {
-                    Directory.CreateDirectory(GetPath("/" + dest));
-                }
-
                 MoveVideo(trackconfig, source, dest);
             }
 
@@ -353,9 +362,16 @@ namespace GHLCP
             stagefright.ParentSetlist = parentSetlist;
         }
 
+        private string GetVideoRelPath(string parentSetlist, bool enabled) => platform.GetRelPath(enabled ? "setlists/" + parentSetlist + "/video/positive/" : "Video/" + parentSetlist + "/positive/");
+
         private void MoveVideo(Trackconfig trackconfig, string source, string dest)
         {
             HashSet<string> manifest = new HashSet<string>(File.ReadAllLines(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/manifest.txt")));
+
+            if (!Directory.Exists(GetPath("/" + dest)))
+            {
+                Directory.CreateDirectory(GetPath("/" + dest));
+            }
 
             foreach (string file in Directory.GetFiles(GetPath("/" + source)))
             {
