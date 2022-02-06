@@ -72,6 +72,24 @@
     <Compile Include="AboutGHLCP.Designer.cs">
       <DependentUpon>AboutGHLCP.cs</DependentUpon>
     </Compile>
+    <Compile Include="Diagnostics\ConsoleLogger.cs" />
+    <Compile Include="Diagnostics\ILogger.cs" />
+    <Compile Include="Diagnostics\Logger.cs" />
+    <Compile Include="Diagnostics\LoggerType.cs" />
+    <Compile Include="FileManager\FtpFileManager.cs" />
+    <Compile Include="FileManager\FtpLoggerExtensions.cs" />
+    <Compile Include="FileManager\FtpRequestStream.cs" />
+    <Compile Include="FileManager\IFileManager.cs" />
+    <Compile Include="FileManager\LocalFileManager.cs" />
+    <Compile Include="FileManager\RemoteFileInfo.cs" />
+    <Compile Include="Gamedir\FtpGamedirFactory.cs" />
+    <Compile Include="Gamedir\LocalGamedirFactory.cs" />
+    <Compile Include="OpenForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OpenForm.Designer.cs">
+      <DependentUpon>OpenForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Gamedir\Platform.cs" />
     <Compile Include="SearchForm.cs">
       <SubType>Form</SubType>
@@ -97,7 +115,6 @@
     <Compile Include="EditSong.Designer.cs">
       <DependentUpon>EditSong.cs</DependentUpon>
     </Compile>
-    <Compile Include="FileManager.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -126,6 +143,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OpenForm.resx">
+      <DependentUpon>OpenForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

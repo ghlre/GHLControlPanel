@@ -53,9 +53,9 @@
             this.ghlCpVersion.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ghlCpVersion.Location = new System.Drawing.Point(230, 47);
             this.ghlCpVersion.Name = "ghlCpVersion";
-            this.ghlCpVersion.Size = new System.Drawing.Size(100, 15);
+            this.ghlCpVersion.Size = new System.Drawing.Size(91, 15);
             this.ghlCpVersion.TabIndex = 2;
-            this.ghlCpVersion.Text = "version 0.4.1-beta";
+            this.ghlCpVersion.Text = "version 0.5-beta";
             // 
             // dby
             // 

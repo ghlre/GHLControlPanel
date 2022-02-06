@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GHLCP.Diagnostics;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -72,6 +73,7 @@ namespace GHLCP
             {
                 statusLabel.Text = e.Error is InvalidOperationException ? e.Error.Message : "An unknown error occurred while importing " + Path.GetFileName(filenames[importProgressBar.Value]);
                 statusLabel.ForeColor = Color.Red;
+                Logger.Instance.Error(e.Error.Message);
             } else
             {
                 statusLabel.Text = "Track import completed";

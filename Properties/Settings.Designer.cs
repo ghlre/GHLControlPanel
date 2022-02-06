@@ -82,5 +82,29 @@ namespace GHLCP.Properties {
                 this["importParent"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string pastFtpUri {
+            get {
+                return ((string)(this["pastFtpUri"]));
+            }
+            set {
+                this["pastFtpUri"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string pastFtpUsername {
+            get {
+                return ((string)(this["pastFtpUsername"]));
+            }
+            set {
+                this["pastFtpUsername"] = value;
+            }
+        }
     }
 }

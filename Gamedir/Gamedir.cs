@@ -1,4 +1,6 @@
-﻿using System;
+﻿using GHLCP.Diagnostics;
+using GHLCP.FileManager;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -13,19 +15,26 @@ namespace GHLCP
     {
         private readonly string gamedir;
         private readonly Platform platform;
+        private readonly IFileManager fileManager;
 
         private Dictionary<string, Trackconfig> installed;
         private List<string> active;
 
         private static readonly XmlSerializer trackconfigSerializer = new XmlSerializer(typeof(Trackconfig));
 
-        public Gamedir(string gamedir, Platform platform)
+        public Gamedir(string gamedir, Platform platform, IFileManager fileManager)
         {
             this.gamedir = gamedir;
             this.platform = platform;
+            this.fileManager = fileManager;
 
             ReadInstalled();
             ReadActive();
+        }
+
+        public Gamedir(string gamedir, Platform platform) 
+            : this(gamedir, platform, new LocalFileManager())
+        {
         }
 
         #region Properties
@@ -34,22 +43,29 @@ namespace GHLCP
 
         public Platform Platform { get => platform; }
 
+        public IFileManager FileManager { get => fileManager; }
+
         #endregion
 
-        public string GetPath(string path) => gamedir + platform.GetRelPath(path);
+        public string GetPath(string path)
+        {
+            return string.Concat(gamedir, platform.GetRelPath(path));
+        }
 
         public void ReadInstalled()
         {
             installed = new Dictionary<string, Trackconfig>();
-            string trackconfigPath = platform.GetRelPath("/trackconfig.xml");
+            string trackconfigFilename = platform.GetRelPath("/trackconfig.xml");
+            string trackconfigPath;
 
-            foreach (string dir in Directory.GetDirectories(GetPath("/Audio/AudioTracks")))
+            foreach (string dir in fileManager.GetDirectories(GetPath("/Audio/AudioTracks")))
             {
-                if (File.Exists(dir + trackconfigPath))
+                trackconfigPath = string.Concat(dir, trackconfigFilename);
+                if (fileManager.FileExists(trackconfigPath))
                 {
-                    using (StreamReader reader = new StreamReader(dir + trackconfigPath))
+                    using (Stream stream = fileManager.OpenRead(trackconfigPath))
                     {
-                        Trackconfig trackconfig = trackconfigSerializer.Deserialize(reader) as Trackconfig;
+                        Trackconfig trackconfig = trackconfigSerializer.Deserialize(stream) as Trackconfig;
                         installed.Add(trackconfig.Id, trackconfig);
                     }
                 }
@@ -62,7 +78,10 @@ namespace GHLCP
         {
             active = new List<string>();
             XmlDocument document = new XmlDocument();
-            document.Load(GetPath("/Audio/AudioTracks/Setlists.xml"));
+            using (Stream stream = fileManager.OpenRead(GetPath("/Audio/AudioTracks/Setlists.xml")))
+            {
+                document.Load(stream);
+            }
 
             foreach (XmlElement child in document.SelectNodes("Classes/Class"))
             {
@@ -86,7 +105,10 @@ namespace GHLCP
         {
             string setlistsPath = GetPath("/Audio/AudioTracks/Setlists.xml");
             XmlDocument setlists = new XmlDocument();
-            setlists.Load(setlistsPath);
+            using (Stream stream = fileManager.OpenRead(setlistsPath))
+            {
+                setlists.Load(stream);
+            }
 
             foreach (XmlElement child in setlists.SelectNodes("Classes/Class"))
             {
@@ -106,15 +128,20 @@ namespace GHLCP
             }
 
             Backup(setlistsPath);
-            File.WriteAllText(setlistsPath, setlists.OuterXml);
+            using (Stream stream = fileManager.OpenWrite(setlistsPath))
+            {
+                setlists.Save(stream);
+            }
         }
 
         public void WriteTracklisting()
         {
             string tracklistingPath = GetPath("/Audio/AudioTracks/Tracklisting.xml");
             XmlDocument tracklisting = new XmlDocument();
-            XmlElement elem = tracklisting.CreateElement("Tracks");
+            XmlDeclaration declaration = tracklisting.CreateXmlDeclaration("1.0", "us-ascii", null);
+            tracklisting.AppendChild(declaration);
 
+            XmlElement elem = tracklisting.CreateElement("Tracks");
             elem.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
             elem.SetAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
 
@@ -128,7 +155,10 @@ namespace GHLCP
             tracklisting.AppendChild(elem);
 
             Backup(tracklistingPath);
-            File.WriteAllText(tracklistingPath, "<?xml version=\"1.0\" encoding=\"us-ascii\"?>" + tracklisting.OuterXml);
+            using (Stream stream = fileManager.OpenWrite(tracklistingPath))
+            {
+                tracklisting.Save(stream);
+            }
         }
 
         #endregion
@@ -151,10 +181,13 @@ namespace GHLCP
 
             foreach (string id in active)
             {
-                Trackconfig trackconfig = installed[id];
+                if (installed.Keys.Contains(id))
+                {
+                    Trackconfig trackconfig = installed[id];
 
-                songlist += "\n";
-                songlist += trackconfig.Id + "," + trackconfig.Artist + "," + trackconfig.Trackname + "," + trackconfig.Intensity;
+                    songlist = string.Concat(songlist, "\n", 
+                        string.Join(",", trackconfig.Id, trackconfig.Artist, trackconfig.Trackname, trackconfig.Intensity));
+                }
             }
 
             return songlist;
@@ -218,7 +251,7 @@ namespace GHLCP
             {
                 string id = archive.Entries[0].FullName.Split('/')[0];
                 string manifestFile = GetPath("/Audio/AudioTracks/" + id + "/manifest.txt");
-                HashSet<string> manifest = File.Exists(manifestFile) ? new HashSet<string>(File.ReadAllLines(manifestFile)) : new HashSet<string>();
+                HashSet<string> manifest = fileManager.FileExists(manifestFile) ? new HashSet<string>(fileManager.ReadAllLines(manifestFile)) : new HashSet<string>();
 
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
@@ -227,7 +260,7 @@ namespace GHLCP
                     {
                         string extractFor = pathElements[1].ToLower();
                         pathElements.RemoveRange(0, 2);
-                        string path = platform.GetRelPath(String.Join("/", pathElements));
+                        string path = platform.GetRelPath(string.Join("/", pathElements));
 
                         if (platform.Extracts(extractFor))
                         {
@@ -235,23 +268,29 @@ namespace GHLCP
                             {
                                 manifest.Add(path);
                                 pathElements.RemoveAt(pathElements.Count - 1);
-                                string folderPath = platform.GetRelPath(String.Join("/", pathElements));
+                                string folderPath = platform.GetRelPath(string.Join("/", pathElements));
 
-                                if (!Directory.Exists(GetPath("/" + folderPath)))
+                                if (!fileManager.DirectoryExists(GetPath(string.Concat("/", folderPath))))
                                 {
-                                    RaiseImportProgressChanged($"Creating \"{entry.FullName}\" in \"{GetPath("/" + folderPath)}\"");
-                                    Directory.CreateDirectory(GetPath("/" + folderPath));
+                                    RaiseImportProgressChanged($"Creating \"{entry.FullName}\" in \"{GetPath(string.Concat("/", folderPath))}\"");
+                                    fileManager.CreateDirectory(GetPath(string.Concat("/", folderPath)));
                                 }
-                                RaiseImportProgressChanged($"Extracting \"{entry.FullName}\" to \"{GetPath("/" + path)}\"");
-                                entry.ExtractToFile(GetPath("/" + path), true);
+                                RaiseImportProgressChanged($"Extracting \"{entry.FullName}\" to \"{GetPath(string.Concat("/", path))}\"");
+                                using (Stream zipStream = entry.Open())
+                                {
+                                    using (Stream stream = fileManager.OpenWrite(GetPath(string.Concat("/", path))))
+                                    {
+                                        zipStream.CopyTo(stream);
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                File.WriteAllLines(manifestFile, manifest.ToArray());
+                fileManager.WriteAllLines(manifestFile, manifest);
 
-                if (!File.Exists(GetPath("/Audio/AudioTracks/" + id + "/trackconfig.xml")))
+                if (!fileManager.FileExists(GetPath("/Audio/AudioTracks/" + id + "/trackconfig.xml")))
                     throw new InvalidOperationException("Trackconfig not found. Please import the track data before the video");
 
                 Trackconfig trackconfig = ReadTrackconfig(id);
@@ -260,7 +299,9 @@ namespace GHLCP
 
                 bool trackconfigChanged = false;
 
-                if (Properties.Settings.Default.importVideo && manifest.Where(file => file.ToLower().EndsWith("video.xml")).Count() > 0 && !trackconfig.Video.HasVideo)
+                if (Properties.Settings.Default.importVideo &&
+                    manifest.Any(file => file.EndsWith("video.xml", StringComparison.OrdinalIgnoreCase)) &&
+                    !trackconfig.Video.HasVideo)
                 {
                     trackconfig.Video.HasVideo = true;
                     trackconfigChanged = true;
@@ -279,7 +320,7 @@ namespace GHLCP
                         string source = GetVideoRelPath(parentSetlist, false);
                         string dest = GetVideoRelPath(parentSetlist, true);
 
-                        if (File.Exists(GetPath("/" + source + "video.xml")))
+                        if (fileManager.FileExists(GetPath("/" + source + "video.xml")))
                         {
                             MoveVideo(trackconfig, source, dest);
                         }
@@ -297,28 +338,31 @@ namespace GHLCP
 
         public Trackconfig ReadTrackconfig(string id)
         {
-            using (StreamReader reader = new StreamReader(GetPath("/Audio/AudioTracks/" + id + "/trackconfig.xml")))
+            using (Stream stream = fileManager.OpenRead(GetPath("/Audio/AudioTracks/" + id + "/trackconfig.xml")))
             {
-                return trackconfigSerializer.Deserialize(reader) as Trackconfig;
+                return trackconfigSerializer.Deserialize(stream) as Trackconfig;
             }
         }
 
         public void WriteTrackconfig(Trackconfig trackconfig)
         {
-            if (!File.Exists(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/trackconfig.xml.bak")))
+            string trackconfigPath = GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/trackconfig.xml");
+            if (!fileManager.FileExists(string.Concat(trackconfigPath, platform.GetRelPath(".bak"))))
             {
-                Backup(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/trackconfig.xml"));
+                Backup(trackconfigPath);
             }
 
-            using (StreamWriter writer = new StreamWriter(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/trackconfig.xml")))
+            using (Stream stream = fileManager.OpenWrite(trackconfigPath))
             {
-                trackconfigSerializer.Serialize(writer, trackconfig);
+                trackconfigSerializer.Serialize(stream, trackconfig);
             }
         }
 
         public void RemoveTrack(Trackconfig trackconfig)
         {
-            string[] manifest = File.ReadAllLines(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/manifest.txt"));
+            string manifestPath = GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/manifest.txt");
+            IEnumerable<string> manifest = fileManager.ReadAllLines(manifestPath);
+            
             foreach (string filepath in manifest)
             {
                 if (filepath.EndsWith("/") || filepath == "")
@@ -328,15 +372,18 @@ namespace GHLCP
                 {
                     try
                     {
-                        File.Delete(GetPath("/" + filepath));
+                        fileManager.Delete(GetPath(string.Concat("/", filepath)));
                     }
-                    catch (Exception) { }
+                    catch (Exception ex)
+                    {
+                        Logger.Instance.Warning(ex.Message);
+                    }
                 }
             }
 
             installed.Remove(trackconfig.Id);
             active.Remove(trackconfig.Id);
-            File.Delete(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/manifest.txt"));
+            fileManager.Delete(manifestPath);
         }
 
         #endregion
@@ -353,8 +400,13 @@ namespace GHLCP
             string source = GetVideoRelPath(stagefright.ParentSetlist, stagefright.Enabled);
             string dest = GetVideoRelPath(parentSetlist, enable);
 
-            if (source != dest && File.Exists(GetPath("/" + source + "video.xml")))
+            if (source != dest && fileManager.FileExists(GetPath("/" + source + "video.xml")))
             {
+                if (!fileManager.DirectoryExists(GetPath("/" + dest)))
+                {
+                    fileManager.CreateDirectory(GetPath("/" + dest));
+                }
+
                 MoveVideo(trackconfig, source, dest);
             }
 
@@ -362,39 +414,42 @@ namespace GHLCP
             stagefright.ParentSetlist = parentSetlist;
         }
 
-        private string GetVideoRelPath(string parentSetlist, bool enabled) => platform.GetRelPath(enabled ? "setlists/" + parentSetlist + "/video/positive/" : "Video/" + parentSetlist + "/positive/");
+        private string GetVideoRelPath(string parentSetlist, bool enabled)
+        {
+            return platform.GetRelPath(enabled ? "setlists/" + parentSetlist + "/video/positive/" : "Video/" + parentSetlist + "/positive/");
+        }
 
         private void MoveVideo(Trackconfig trackconfig, string source, string dest)
         {
-            HashSet<string> manifest = new HashSet<string>(File.ReadAllLines(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/manifest.txt")));
-
-            if (!Directory.Exists(GetPath("/" + dest)))
+            HashSet<string> manifest = new HashSet<string>(fileManager.ReadAllLines(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/manifest.txt")));
+            
+            if (!fileManager.DirectoryExists(GetPath("/" + dest)))
             {
-                Directory.CreateDirectory(GetPath("/" + dest));
+                fileManager.CreateDirectory(GetPath("/" + dest));
             }
 
-            foreach (string file in Directory.GetFiles(GetPath("/" + source)))
+            foreach (string file in fileManager.GetFiles(GetPath("/" + source)))
             {
                 manifest.Remove(source + Path.GetFileName(file));
 
-                if (File.Exists(GetPath("/" + dest + Path.GetFileName(file))))
+                if (fileManager.FileExists(GetPath("/" + dest + Path.GetFileName(file))))
                 {
                     Backup(GetPath("/" + dest + Path.GetFileName(file)));
-                    File.Delete(GetPath("/" + dest + Path.GetFileName(file)));
+                    fileManager.Delete(GetPath("/" + dest + Path.GetFileName(file)));
                 }
 
-                File.Move(file, GetPath("/" + dest + Path.GetFileName(file)));
+                fileManager.Move(file, GetPath("/" + dest + Path.GetFileName(file)));
                 manifest.Add(dest + Path.GetFileName(file));
             }
 
-            File.WriteAllLines(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/manifest.txt"), manifest.ToArray());
+            fileManager.WriteAllLines(GetPath("/Audio/AudioTracks/" + trackconfig.Id + "/manifest.txt"), manifest);
         }
 
         #endregion
 
         public void Backup(string path)
         {
-            File.Copy(path, path + platform.GetRelPath(".bak"), true);
+            fileManager.Copy(path, string.Concat(path, platform.GetRelPath(".bak")));
         }
 
         public override string ToString() => gamedir;

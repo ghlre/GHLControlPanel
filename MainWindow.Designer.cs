@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
-            this.GameFinderDialog = new System.Windows.Forms.OpenFileDialog();
             this.installedListView = new System.Windows.Forms.ListView();
             this.installedIdHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.installedSongHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -147,11 +146,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.maximumMultiplier)).BeginInit();
             this.controlStrip.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // GameFinderDialog
-            // 
-            this.GameFinderDialog.Filter = "Wii U|GHLive.rpx|PlayStation 3|EBOOT.BIN|Xbox 360|default.xex|iOS|GHLive";
-            this.GameFinderDialog.Title = "GHL Installation Files";
             // 
             // installedListView
             // 
@@ -1116,8 +1110,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.OpenFileDialog GameFinderDialog;
         private System.Windows.Forms.ListView installedListView;
         private System.Windows.Forms.ColumnHeader installedIdHeader;
         private System.Windows.Forms.ColumnHeader installedSongHeader;
