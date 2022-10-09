@@ -97,7 +97,15 @@ namespace GHLCP.FileManager
         public void Move(string source, string dest)
         {
             FtpWebRequest request = CreateFtpRequest(source, WebRequestMethods.Ftp.Rename);
-            request.RenameTo = dest;
+
+            if (Uri.TryCreate(dest, UriKind.Absolute, out var uri))
+            {
+                request.RenameTo = uri.LocalPath;
+            }
+            else
+            {
+                request.RenameTo = dest;
+            }
 
             using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
             {
